@@ -85,6 +85,9 @@ const MOBILE_NAV = [
   { label: "FAQ", id: "faq", icon: HelpCircle },
 ];
 
+const TOP_NOTICE =
+  "We may pause the VibeCoding continuous hackathons after completion of 6 editions";
+
 function Index() {
   return (
     <div className="min-h-screen pb-24 text-foreground md:pb-0">
@@ -134,6 +137,13 @@ function Nav() {
           : "bg-transparent"
       }`}
     >
+      <div className="overflow-hidden border-b border-white/5 bg-ink/70 px-4 py-1 text-[8px] font-medium uppercase tracking-[0.28em] text-muted-foreground sm:px-6 sm:text-[9px]">
+        <div className="marquee-ltr flex w-max items-center gap-12 whitespace-nowrap">
+          <span>{TOP_NOTICE}</span>
+          <span aria-hidden="true">{TOP_NOTICE}</span>
+          <span aria-hidden="true">{TOP_NOTICE}</span>
+        </div>
+      </div>
       <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3 sm:px-6 md:py-4">
         <a href="#top" className="group flex min-w-0 items-center gap-2 justify-self-start">
           <div className="relative size-9 rounded-lg tricolor-bar grid place-items-center">
@@ -618,11 +628,11 @@ function Benefits() {
 
 function PastHackathons() {
   const editions = [
-    { name: "January 2026", mode: "Individual", winner: "TV Geethika", runner: "B. Manoj Kumar", poster: janPoster },
-    { name: "February 2026", mode: "Team Based", winner: "GenZ", runner: "TechNova", poster: febPoster },
-    { name: "March 2026", mode: "Team Based", winner: "Dynamic Duo", runner: "Code Queens", poster: marPoster },
-    { name: "April 2026", mode: "VibeCoding 4.0", winner: "Team Tech Titans", runner: "Cyber Techie", poster: aprPoster },
-    { name: "May 2026", mode: "VibeCoding 5.0", winner: "Rockers", runner: "Unstoppable", poster: mayPoster },
+    { name: "January 2026 Poster", mode: "Mode: Individual Participation", winner: "TV Geethika", runner: "B. Manoj Kumar", poster: janPoster },
+    { name: "February 2026 Poster", mode: "Mode: Team Based", winner: "GenZ", runner: "TechNova", poster: febPoster },
+    { name: "March 2026 Poster", mode: "Mode: Online Hackathon", winner: "Dynamic Duo", runner: "Code Queens", poster: marPoster },
+    { name: "April 2026 Poster", mode: "Mode: Team Based - VibeCoding 4.0", winner: "Team Tech Titans", runner: "Cyber Techie", poster: aprPoster },
+    { name: "May 2026 Poster", mode: "Mode: Online - VibeCoding 5.0", winner: "Rockers", runner: "Unstoppable", poster: mayPoster },
   ];
   return (
     <section id="past" className="py-24 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent">

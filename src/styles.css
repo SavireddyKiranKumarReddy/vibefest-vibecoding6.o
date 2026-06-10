@@ -155,3 +155,12 @@
 @utility pulse-glow {
   animation: pulse-glow 2.4s ease-in-out infinite;
 }
+
+@keyframes marquee-ltr {
+  from { transform: translateX(-33.333%); }
+  to { transform: translateX(0); }
+}
+
+@utility marquee-ltr {
+  animation: marquee-ltr 22s linear infinite;
+}
