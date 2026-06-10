@@ -35,11 +35,11 @@ import {
   UserPlus,
 } from "lucide-react";
 
-import janPoster from "@/assets/posters/jan.jpg";
-import febPoster from "@/assets/posters/feb.jpg";
-import marPoster from "@/assets/posters/mar.jpg";
-import aprPoster from "@/assets/posters/apr.jpg";
-import mayPoster from "@/assets/posters/may.jpg";
+import janPoster from "@/assets/posters/january-2026.jpg";
+import febPoster from "@/assets/posters/february-2026.jpg";
+import marPoster from "@/assets/posters/march-2026.jpg";
+import aprPoster from "@/assets/posters/april-2026.jpeg";
+import mayPoster from "@/assets/posters/may-2026.jpeg";
 
 // TODO: Replace with the actual Google Form URL when provided.
 const GOOGLE_FORM_URL = "https://forms.gle/your-google-form-id";
