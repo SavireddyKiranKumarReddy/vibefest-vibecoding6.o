@@ -643,22 +643,22 @@ function PastHackathons() {
           sub="5 editions completed · 1000+ builders across India · growing every month."
         />
         <div className="overflow-hidden">
-          <div className="marquee-left-to-right flex w-max items-stretch gap-5">
+          <div className="marquee-past-hackathons flex w-max items-stretch gap-5">
             {[...editions, ...editions].map((e, index) => (
               <div
                 key={`${e.name}-${index}`}
                 className="group w-[250px] shrink-0 rounded-2xl overflow-hidden border border-white/10 bg-card/60 backdrop-blur hover:-translate-y-1 hover:border-saffron/40 transition shadow-[var(--shadow-elevate)] sm:w-[280px]"
               >
-                <div className="relative aspect-[4/5] overflow-hidden">
+                <div className="relative aspect-[4/5] overflow-hidden bg-ink">
                   <img
                     src={e.poster}
                     alt={`${e.name} VibeCoding poster`}
                     loading="lazy"
                     width={832}
                     height={1056}
-                    className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="size-full object-contain p-2 transition-transform duration-700 group-hover:scale-[1.02]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink/85 to-transparent" />
                   <div className="absolute top-3 left-3 text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-black/60 backdrop-blur border border-white/10">
                     {e.mode}
                   </div>

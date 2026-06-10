@@ -165,11 +165,11 @@
   animation: marquee-ltr 22s linear infinite;
 }
 
-@keyframes marquee-left-to-right {
-  from { transform: translateX(-50%); }
-  to { transform: translateX(0); }
+@keyframes marquee-past-hackathons {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
-@utility marquee-left-to-right {
-  animation: marquee-left-to-right 34s linear infinite;
+@utility marquee-past-hackathons {
+  animation: marquee-past-hackathons 34s linear infinite;
 }
