@@ -155,12 +155,13 @@ function TricolorDivider() {
 }
 
 function useCountdown(target: Date) {
-  const [now, setNow] = useState(() => Date.now());
+  const [diff, setDiff] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
+    const tick = () => setDiff(Math.max(0, target.getTime() - Date.now()));
+    tick();
+    const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, []);
-  const diff = Math.max(0, target.getTime() - now);
+  }, [target.getTime()]);
   const d = Math.floor(diff / 86400000);
   const h = Math.floor((diff % 86400000) / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
@@ -188,8 +189,8 @@ function Hero() {
         <p className="mx-auto mt-6 max-w-2xl text-base md:text-lg text-muted-foreground">
           VibeCoding 6.0 is the June online hackathon for builders who turn one focused idea
           into a working public web product. Organized by{" "}
-          <span className="text-foreground font-semibold">NxtGenSec</span> in collaboration
-          with <span className="text-foreground font-semibold">IgnitionInAiEra</span>.
+          <a href="https://nxtgensec.org" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold hover:text-saffron transition">NxtGenSec</a> in collaboration
+          with <a href="https://www.ignitioninaiera.space" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold hover:text-saffron transition">IgnitionInAiEra</a>.
         </p>
 
         <div className="mt-10 inline-flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-card/60 backdrop-blur p-6 shadow-[var(--shadow-elevate)]">
@@ -558,7 +559,7 @@ function PastHackathons() {
         <SectionHeading
           eyebrow="Hall of Fame"
           title="Past Hackathons"
-          sub="5 editions completed · 100+ builders · growing every month."
+          sub="5 editions completed · 1000+ builders across India · growing every month."
         />
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {editions.map((e) => (
