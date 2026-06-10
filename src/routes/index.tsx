@@ -28,6 +28,11 @@ import {
   Clock,
   Mail,
   ExternalLink,
+  Info,
+  CalendarDays,
+  Gift,
+  HelpCircle,
+  UserPlus,
 } from "lucide-react";
 
 import janPoster from "@/assets/posters/jan.jpg";
@@ -72,10 +77,19 @@ const NAV = [
   ["FAQ", "faq"],
 ];
 
+const MOBILE_NAV = [
+  { label: "About", id: "about", icon: Info },
+  { label: "Timeline", id: "timeline", icon: CalendarDays },
+  { label: "Register", href: GOOGLE_FORM_URL, icon: UserPlus, primary: true },
+  { label: "Benefits", id: "benefits", icon: Gift },
+  { label: "FAQ", id: "faq", icon: HelpCircle },
+];
+
 function Index() {
   return (
-    <div className="min-h-screen text-foreground">
+    <div className="min-h-screen pb-28 text-foreground md:pb-0">
       <Nav />
+      <MobileBottomNav />
       <Hero />
       <TricolorDivider />
       <About />
@@ -91,13 +105,13 @@ function Index() {
   );
 }
 
-function registerLink() {
+function registerLink(className = "") {
   return (
     <a
       href={GOOGLE_FORM_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-primary-foreground bg-primary hover:brightness-110 transition shadow-[var(--shadow-saffron)]"
+      className={`inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-saffron)] transition hover:brightness-110 ${className}`}
     >
       Register <ExternalLink className="size-4" />
     </a>
@@ -120,20 +134,20 @@ function Nav() {
           : "bg-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-6 py-4">
-        <a href="#top" className="flex items-center gap-2 group">
+      <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3 sm:px-6 md:py-4">
+        <a href="#top" className="group flex min-w-0 items-center gap-2 justify-self-start">
           <div className="relative size-9 rounded-lg tricolor-bar grid place-items-center">
             <div className="absolute inset-0.5 rounded-md bg-ink" />
             <span className="relative text-primary font-bold font-display">N</span>
           </div>
-          <div className="leading-tight">
+          <div className="min-w-0 leading-tight">
             <div className="font-display font-bold tracking-tight">NxtGenSec</div>
             <div className="text-[10px] text-muted-foreground uppercase tracking-widest">
               VibeCoding 6.0
             </div>
           </div>
         </a>
-        <nav className="hidden md:flex items-center gap-7 text-sm">
+        <nav className="hidden items-center justify-center gap-4 text-xs lg:flex lg:gap-7 lg:text-sm">
           {NAV.map(([label, id]) => (
             <a
               key={id}
@@ -144,9 +158,67 @@ function Nav() {
             </a>
           ))}
         </nav>
-        {registerLink()}
+        <nav className="hidden items-center justify-center gap-4 text-xs md:flex lg:hidden">
+          {NAV.slice(0, 5).map(([label, id]) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className="text-muted-foreground hover:text-foreground transition relative story-link"
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
+        <div className="hidden justify-self-end md:block">{registerLink()}</div>
       </div>
     </header>
+  );
+}
+
+function MobileBottomNav() {
+  return (
+    <nav className="fixed inset-x-3 bottom-3 z-50 md:hidden">
+      <div className="relative grid grid-cols-5 items-end overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,oklch(0.19_0.02_260/0.96),oklch(0.12_0.015_260/0.98))] px-2 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_18px_60px_-24px_oklch(0_0_0/0.95)] backdrop-blur-2xl">
+        <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        {MOBILE_NAV.map((item) => {
+          const Icon = item.icon;
+          const commonClasses = item.primary
+            ? "relative -mt-8 flex flex-col items-center gap-1 text-primary"
+            : "group flex min-w-0 flex-col items-center gap-1 rounded-[1.05rem] px-1.5 py-1.5 text-muted-foreground transition hover:bg-white/[0.04] hover:text-foreground";
+
+          if (item.primary) {
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={commonClasses}
+                aria-label="Register for VibeCoding 6.0"
+              >
+                <span className="grid size-16 place-items-center rounded-[1.35rem] bg-gradient-to-b from-primary via-[#f59e0b] to-[#d97706] text-ink shadow-[0_18px_40px_-18px_color-mix(in_oklab,var(--saffron)_80%,transparent)] ring-8 ring-ink-2/95">
+                  <Icon className="size-7" strokeWidth={2.5} />
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] leading-none text-primary">
+                  Register
+                </span>
+              </a>
+            );
+          }
+
+          return (
+            <a key={item.label} href={`#${item.id}`} className={commonClasses}>
+              <span className="grid size-9 place-items-center rounded-2xl border border-white/8 bg-white/[0.04] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition group-hover:border-white/15 group-hover:bg-white/[0.07] group-hover:text-primary">
+                <Icon className="size-4.5" strokeWidth={2.1} />
+              </span>
+              <span className="max-w-full truncate text-[10px] font-medium uppercase tracking-[0.14em] leading-none">
+                {item.label}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
@@ -182,15 +254,14 @@ function Hero() {
           India's First Monthly Vibecoding Hackathons
         </div>
         <h1 className="mt-6 font-display text-5xl md:text-7xl font-bold leading-[1.05]">
-          Solve Real Problems.
-          <br />
-          <span className="tricolor-text">Build Fast. Get Recognized.</span>
+          <span className="block">Solve Real Problems.</span>
+          <span className="block tricolor-text">Build Fast. Get Recognized.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base md:text-lg text-muted-foreground">
           VibeCoding 6.0 is the June online hackathon for builders who turn one focused idea
           into a working public web product. Organized by{" "}
-          <a href="https://nxtgensec.org" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold hover:text-saffron transition">NxtGenSec</a> in collaboration
-          with <a href="https://www.ignitioninaiera.space" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold hover:text-saffron transition">IgnitionInAiEra</a>.
+          <a href="https://nxtgensec.org" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold transition hover:text-india-green">NxtGenSec</a> in collaboration
+          with <a href="https://www.ignitioninaiera.space" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold transition hover:text-saffron">IgnitionInAiEra</a>.
         </p>
 
         <div className="mt-10 inline-flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-card/60 backdrop-blur p-6 shadow-[var(--shadow-elevate)]">
