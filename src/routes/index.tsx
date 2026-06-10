@@ -245,16 +245,17 @@ function Hero() {
   const { d, h, m, s } = useCountdown(new Date("2026-06-27T10:00:00+05:30"));
   return (
     <section id="top" className="relative pt-36 pb-24 overflow-hidden grain">
-      <div className="pointer-events-none absolute inset-0 grid place-items-center opacity-[0.07]">
-        <AshokaChakra className="text-chakra chakra-spin" size={780} />
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center justify-end pr-0 opacity-[0.07] md:pr-8">
+        <AshokaChakra className="chakra-spin h-auto w-[78vw] max-w-[780px] text-chakra" size={780} />
       </div>
       <div className="relative mx-auto max-w-6xl px-6 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs uppercase tracking-widest text-muted-foreground">
           <span className="size-1.5 rounded-full bg-saffron pulse-glow" />
           India's First Monthly Vibecoding Hackathons
         </div>
-        <h1 className="mt-6 whitespace-nowrap font-display text-[0.88rem] font-bold leading-tight sm:text-4xl md:text-6xl lg:text-7xl">
-          <span className="tricolor-text">Solve Real Problems. Build Fast. Get Recognized.</span>
+        <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] sm:text-5xl md:text-6xl lg:text-7xl">
+          <span className="block">Solve Real Problems.</span>
+          <span className="block tricolor-text">Build Fast. Get Recognized.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base md:text-lg text-muted-foreground">
           VibeCoding 6.0 is the June online hackathon for builders who turn one focused idea
