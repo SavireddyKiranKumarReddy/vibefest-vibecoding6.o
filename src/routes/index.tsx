@@ -28,6 +28,7 @@ import {
   Clock,
   Mail,
   ExternalLink,
+  Eye,
   Info,
   CalendarDays,
   Gift,
@@ -85,10 +86,15 @@ const MOBILE_NAV = [
   { label: "FAQ", id: "faq", icon: HelpCircle },
 ];
 
+const VISITOR_COUNT_CACHE_KEY = "vibecoding_visitor_count";
+const VISITOR_REFRESH_INTERVAL_MS = 3000;
+const VISITOR_REQUEST_TIMEOUT_MS = 5000;
+
 function Index() {
   return (
     <div className="min-h-screen pb-28 text-foreground md:pb-0">
       <Nav />
+      <VisitorCounter />
       <MobileBottomNav />
       <Hero />
       <TricolorDivider />
@@ -102,6 +108,134 @@ function Index() {
       <FinalCta />
       <Footer />
     </div>
+  );
+}
+
+function VisitorCounter() {
+  const [visitorCount, setVisitorCount] = useState<number | null>(() => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(VISITOR_COUNT_CACHE_KEY);
+    if (raw === null) return null;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  });
+  const [isLoading, setIsLoading] = useState(visitorCount === null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const getSupabaseConfig = () => {
+      const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").trim();
+      const apiKey = String(
+        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+          import.meta.env.VITE_SUPABASE_ANON_KEY ||
+          "",
+      ).trim();
+      return { supabaseUrl, apiKey };
+    };
+
+    const persistCount = (count: number) => {
+      if (!isMounted) return;
+      setVisitorCount(count);
+      window.localStorage.setItem(VISITOR_COUNT_CACHE_KEY, String(count));
+    };
+
+    const buildFunctionUrls = (supabaseUrl: string, functionName: string) => {
+      const urls: string[] = [];
+      if (!supabaseUrl) return urls;
+      urls.push(`${supabaseUrl}/functions/v1/${functionName}`);
+      try {
+        const ref = new URL(supabaseUrl).hostname.split(".")[0];
+        if (ref) urls.push(`https://${ref}.functions.supabase.co/${functionName}`);
+      } catch {
+        // Keep the primary Supabase URL if parsing fails.
+      }
+      return Array.from(new Set(urls));
+    };
+
+    const fetchWithTimeout = async (input: string, init?: RequestInit) => {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), VISITOR_REQUEST_TIMEOUT_MS);
+      try {
+        return await fetch(input, { ...init, signal: controller.signal });
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    };
+
+    const callVisitorFunction = async (functionName: string, method: "GET" | "POST") => {
+      const { supabaseUrl, apiKey } = getSupabaseConfig();
+      const urls = buildFunctionUrls(supabaseUrl, functionName);
+      const headers = apiKey
+        ? {
+            apikey: apiKey,
+            Authorization: `Bearer ${apiKey}`,
+          }
+        : undefined;
+
+      for (const endpoint of urls) {
+        try {
+          const response = await fetchWithTimeout(endpoint, {
+            method,
+            ...(headers ? { headers } : {}),
+          });
+          if (!response.ok) continue;
+          const body = (await response.json()) as { count?: number };
+          if (typeof body.count === "number") return body.count;
+        } catch {
+          // Try the fallback function URL.
+        }
+      }
+
+      return null;
+    };
+
+    const fetchLatestCount = async () => {
+      const count = await callVisitorFunction("get-visitor-stats", "GET");
+      if (typeof count === "number") {
+        persistCount(count);
+        return true;
+      }
+      return false;
+    };
+
+    const trackVisitor = async () => {
+      const count = await callVisitorFunction("track-visitor", "POST");
+      if (typeof count === "number") persistCount(count);
+    };
+
+    const init = async () => {
+      const hasInitialCount = await fetchLatestCount();
+      if (!hasInitialCount && isMounted) {
+        setVisitorCount((prev) => (prev === null ? 0 : prev));
+      }
+      if (isMounted) setIsLoading(false);
+      void trackVisitor();
+    };
+
+    void init();
+
+    const timer = window.setInterval(() => {
+      void fetchLatestCount();
+    }, VISITOR_REFRESH_INTERVAL_MS);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  return (
+    <aside className="fixed left-3 bottom-28 z-40 md:left-5 md:top-1/2 md:bottom-auto md:-translate-y-1/2">
+      <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-2/85 px-3 py-2 shadow-[0_16px_44px_-24px_oklch(0_0_0/0.9)] backdrop-blur-xl md:flex-col md:rounded-2xl md:px-2.5 md:py-3">
+        <span className="grid size-8 place-items-center rounded-full bg-white/[0.05] text-primary ring-1 ring-white/10">
+          <Eye className="size-4" />
+        </span>
+        <span className="font-display text-sm font-bold text-primary tabular-nums md:[writing-mode:vertical-rl] md:rotate-180">
+          {isLoading ? <span className="animate-pulse">...</span> : (visitorCount ?? 0).toLocaleString()}
+        </span>
+      </div>
+    </aside>
   );
 }
 
