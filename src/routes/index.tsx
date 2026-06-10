@@ -642,43 +642,45 @@ function PastHackathons() {
           title="Past Hackathons"
           sub="5 editions completed · 1000+ builders across India · growing every month."
         />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {editions.map((e) => (
-            <div
-              key={e.name}
-              className="group rounded-2xl overflow-hidden border border-white/10 bg-card/60 backdrop-blur hover:-translate-y-1 hover:border-saffron/40 transition shadow-[var(--shadow-elevate)]"
-            >
-              <div className="relative aspect-[4/5] overflow-hidden">
-                <img
-                  src={e.poster}
-                  alt={`${e.name} VibeCoding poster`}
-                  loading="lazy"
-                  width={832}
-                  height={1056}
-                  className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
-                <div className="absolute top-3 left-3 text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-black/60 backdrop-blur border border-white/10">
-                  {e.mode}
-                </div>
-              </div>
-              <div className="p-5">
-                <div className="font-display font-semibold">{e.name}</div>
-                <div className="mt-3 space-y-1.5 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="size-3.5 text-saffron" />
-                    <span className="text-muted-foreground">Winner</span>
-                    <span className="ml-auto font-medium">{e.winner}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Award className="size-3.5 text-india-green" />
-                    <span className="text-muted-foreground">Runner Up</span>
-                    <span className="ml-auto font-medium">{e.runner}</span>
+        <div className="overflow-hidden">
+          <div className="marquee-left-to-right flex w-max items-stretch gap-5">
+            {[...editions, ...editions].map((e, index) => (
+              <div
+                key={`${e.name}-${index}`}
+                className="group w-[250px] shrink-0 rounded-2xl overflow-hidden border border-white/10 bg-card/60 backdrop-blur hover:-translate-y-1 hover:border-saffron/40 transition shadow-[var(--shadow-elevate)] sm:w-[280px]"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden">
+                  <img
+                    src={e.poster}
+                    alt={`${e.name} VibeCoding poster`}
+                    loading="lazy"
+                    width={832}
+                    height={1056}
+                    className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
+                  <div className="absolute top-3 left-3 text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-black/60 backdrop-blur border border-white/10">
+                    {e.mode}
                   </div>
                 </div>
+                <div className="p-5">
+                  <div className="font-display font-semibold">{e.name}</div>
+                  <div className="mt-3 space-y-1.5 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="size-3.5 text-saffron" />
+                      <span className="text-muted-foreground">Winner</span>
+                      <span className="ml-auto font-medium">{e.winner}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Award className="size-3.5 text-india-green" />
+                      <span className="text-muted-foreground">Runner Up</span>
+                      <span className="ml-auto font-medium">{e.runner}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

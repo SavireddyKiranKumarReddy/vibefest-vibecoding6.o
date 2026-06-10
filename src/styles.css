@@ -164,3 +164,12 @@
 @utility marquee-ltr {
   animation: marquee-ltr 22s linear infinite;
 }
+
+@keyframes marquee-left-to-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+@utility marquee-left-to-right {
+  animation: marquee-left-to-right 34s linear infinite;
+}
