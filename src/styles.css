@@ -173,3 +173,12 @@
 @utility marquee-past-hackathons {
   animation: marquee-past-hackathons 34s linear infinite;
 }
+
+@keyframes marquee-collaborators-ltr {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+@utility marquee-collaborators-ltr {
+  animation: marquee-collaborators-ltr 28s linear infinite;
+}

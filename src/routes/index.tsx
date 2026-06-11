@@ -28,13 +28,14 @@ import {
   Clock,
   Mail,
   ExternalLink,
-  Info,
-  CalendarDays,
-  Gift,
+  Home,
+  CalendarRange,
+  Gem,
   HelpCircle,
   UserPlus,
 } from "lucide-react";
 
+import nxtGenSecLogo from "@/assets/nxtgensec-logo.png";
 import janPoster from "@/assets/posters/january-2026.jpg";
 import febPoster from "@/assets/posters/february-2026.jpg";
 import marPoster from "@/assets/posters/march-2026.jpg";
@@ -48,17 +49,17 @@ const LINKEDIN_POST_URL = "https://www.linkedin.com/company/nxtgensec/";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "VibeCoding 6.0 — NxtGenSec Monthly Hackathon | June 2026" },
+      { title: "VibeCoding Hackathon 6.0 - NxtGenSec (Next Generation Security) | July 2026" },
       {
         name: "description",
         content:
-          "VibeCoding 6.0 by NxtGenSec — India's monthly online hackathon. Free registration, solo or team up to 4, ₹10,000+ prize pool. Kickoff June 27, 2026.",
+          "VibeCoding Hackathon 6.0 by NxtGenSec (Next Generation Security) is the July 2026 online hackathon. Registration starts June 1. Build on July 25, 26, and 27. Final submission is due July 27 at 11:49 PM IST.",
       },
-      { property: "og:title", content: "VibeCoding 6.0 — NxtGenSec Hackathon" },
+      { property: "og:title", content: "VibeCoding Hackathon 6.0 - NxtGenSec (Next Generation Security)" },
       {
         property: "og:description",
         content:
-          "Solve real problems. Build fast. Get recognized. Join VibeCoding 6.0 — June 27-28, 2026.",
+          "Solve real problems. Build fast. Get recognized. Join VibeCoding Hackathon 6.0 from July 25-27, 2026.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -73,20 +74,17 @@ const NAV = [
   ["Timeline", "timeline"],
   ["Process", "process"],
   ["Benefits", "benefits"],
-  ["Past", "past"],
+  ["Past Hackathons", "past"],
   ["FAQ", "faq"],
 ];
 
 const MOBILE_NAV = [
-  { label: "About", id: "about", icon: Info },
-  { label: "Timeline", id: "timeline", icon: CalendarDays },
+  { label: "Home", id: "top", icon: Home },
+  { label: "Timeline", id: "timeline", icon: CalendarRange },
   { label: "Register", href: GOOGLE_FORM_URL, icon: UserPlus, primary: true },
-  { label: "Benefits", id: "benefits", icon: Gift },
-  { label: "FAQ", id: "faq", icon: HelpCircle },
+  { label: "Benefits", id: "benefits", icon: Gem },
+  { label: "FAQs", id: "faq", icon: HelpCircle },
 ];
-
-const TOP_NOTICE =
-  "We may pause the VibeCoding continuous hackathons after completion of 6 editions";
 
 function Index() {
   return (
@@ -100,7 +98,8 @@ function Index() {
       <Timeline />
       <Process />
       <Benefits />
-      <PastHackathons />
+      <Collaborators />
+      <PastHackathonsShowcase />
       <Faq />
       <FinalCta />
       <Footer />
@@ -137,23 +136,24 @@ function Nav() {
           : "bg-transparent"
       }`}
     >
-      <div className="overflow-hidden border-b border-white/5 bg-ink/70 px-4 py-1 text-[8px] font-medium uppercase tracking-[0.28em] text-muted-foreground sm:px-6 sm:text-[9px]">
-        <div className="marquee-ltr flex w-max items-center gap-12 whitespace-nowrap">
-          <span>{TOP_NOTICE}</span>
-          <span aria-hidden="true">{TOP_NOTICE}</span>
-          <span aria-hidden="true">{TOP_NOTICE}</span>
-        </div>
-      </div>
-      <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3 sm:px-6 md:py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 md:grid md:grid-cols-[1fr_auto_1fr] md:py-4">
         <a href="#top" className="group flex min-w-0 items-center gap-2 justify-self-start">
-          <div className="relative size-9 rounded-lg tricolor-bar grid place-items-center">
-            <div className="absolute inset-0.5 rounded-md bg-ink" />
-            <span className="relative text-primary font-bold font-display">N</span>
-          </div>
-          <div className="min-w-0 leading-tight">
-            <div className="font-display font-bold tracking-tight">NxtGenSec</div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-widest">
-              VibeCoding 6.0
+          <img
+            src={nxtGenSecLogo}
+            alt="NxtGenSec (Next Generation Security) logo"
+            width={40}
+            height={40}
+            className="size-10 rounded-lg bg-black object-contain p-0.5 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
+          />
+          <div className="min-w-0 leading-none">
+            <div className="font-display text-sm font-bold tracking-tight sm:text-base">
+              NxtGenSec
+            </div>
+            <div className="mt-0.5 text-[9px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:text-[10px]">
+              Next Generation Security
+            </div>
+            <div className="mt-0.5 text-[8px] uppercase tracking-[0.18em] text-saffron sm:text-[9px]">
+              Securing Digital Assets
             </div>
           </div>
         </a>
@@ -188,13 +188,13 @@ function Nav() {
 function MobileBottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 md:hidden">
-      <div className="relative grid grid-cols-5 items-end overflow-hidden rounded-t-[1.35rem] border border-white/10 border-b-0 bg-[linear-gradient(180deg,oklch(0.19_0.02_260/0.96),oklch(0.12_0.015_260/0.98))] px-1.5 pb-[calc(0.45rem+env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-18px_60px_-24px_oklch(0_0_0/0.95)] backdrop-blur-2xl">
+      <div className="relative grid h-[76px] grid-cols-5 items-center overflow-hidden rounded-t-2xl border border-white/10 border-b-0 bg-[linear-gradient(180deg,oklch(0.19_0.02_260/0.98),oklch(0.115_0.014_260/0.99))] px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-18px_60px_-24px_oklch(0_0_0/0.95)] backdrop-blur-2xl">
         <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         {MOBILE_NAV.map((item) => {
           const Icon = item.icon;
           const commonClasses = item.primary
-            ? "relative -mt-7 flex flex-col items-center gap-0.5 text-primary"
-            : "group flex min-w-0 flex-col items-center gap-0.5 rounded-[0.9rem] px-1 py-1 text-muted-foreground transition hover:bg-white/[0.04] hover:text-foreground";
+            ? "relative flex h-full flex-col items-center justify-center gap-1 text-primary"
+            : "group flex h-full min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-muted-foreground transition hover:bg-white/[0.04] hover:text-foreground";
 
           if (item.primary) {
             return (
@@ -206,10 +206,10 @@ function MobileBottomNav() {
                 className={commonClasses}
                 aria-label="Register for VibeCoding 6.0"
               >
-                <span className="grid size-14 place-items-center rounded-[1.2rem] bg-gradient-to-b from-primary via-[#f59e0b] to-[#d97706] text-ink shadow-[0_18px_40px_-18px_color-mix(in_oklab,var(--saffron)_80%,transparent)] ring-6 ring-ink-2/95">
-                  <Icon className="size-6" strokeWidth={2.5} />
+                <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-b from-primary via-[#f59e0b] to-[#d97706] text-ink shadow-[0_16px_34px_-18px_color-mix(in_oklab,var(--saffron)_80%,transparent)] ring-1 ring-white/30">
+                  <Icon className="size-5" strokeWidth={2.4} />
                 </span>
-                <span className="text-[9px] font-semibold uppercase tracking-[0.14em] leading-none text-primary">
+                <span className="text-[9px] font-semibold uppercase leading-none text-primary">
                   Register
                 </span>
               </a>
@@ -218,10 +218,10 @@ function MobileBottomNav() {
 
           return (
             <a key={item.label} href={`#${item.id}`} className={commonClasses}>
-              <span className="grid size-8 place-items-center rounded-xl border border-white/8 bg-white/[0.04] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition group-hover:border-white/15 group-hover:bg-white/[0.07] group-hover:text-primary">
-                <Icon className="size-4" strokeWidth={2.1} />
+              <span className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/[0.045] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] transition group-hover:border-white/15 group-hover:bg-white/[0.07] group-hover:text-primary">
+                <Icon className="size-[17px]" strokeWidth={2.15} />
               </span>
-              <span className="max-w-full truncate text-[9px] font-medium uppercase tracking-[0.12em] leading-none">
+              <span className="max-w-full truncate text-[9px] font-medium uppercase leading-none">
                 {item.label}
               </span>
             </a>
@@ -252,33 +252,32 @@ function useCountdown(target: Date) {
 }
 
 function Hero() {
-  const { d, h, m, s } = useCountdown(new Date("2026-06-27T10:00:00+05:30"));
+  const { d, h, m, s } = useCountdown(new Date("2026-07-25T10:00:00+05:30"));
   return (
-    <section id="top" className="relative pt-36 pb-24 overflow-hidden grain">
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center justify-end pr-0 opacity-[0.07] md:pr-8">
-        <AshokaChakra className="chakra-spin h-auto w-[78vw] max-w-[780px] text-chakra" size={780} />
+    <section id="top" className="relative overflow-hidden pt-28 pb-24 md:pt-32 grain">
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.07]">
+        <AshokaChakra className="chakra-spin h-auto w-[92vw] max-w-[780px] text-chakra" size={780} />
       </div>
       <div className="relative mx-auto max-w-6xl px-6 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs uppercase tracking-widest text-muted-foreground">
           <span className="size-1.5 rounded-full bg-saffron pulse-glow" />
           India's First Monthly Vibecoding Hackathons
         </div>
-        <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] sm:text-5xl md:text-6xl lg:text-7xl">
-          <span className="block">Solve Real Problems.</span>
-          <span className="block tricolor-text">Build Fast. Get Recognized.</span>
+        <h1 className="mt-6 font-display text-[clamp(1.45rem,6.2vw,4.5rem)] font-bold leading-[1.06] sm:text-[clamp(3rem,5.5vw,4.5rem)]">
+          <span className="block whitespace-nowrap">Solve Real Problems.</span>
+          <span className="block whitespace-nowrap tricolor-text">Build Fast. Get Recognized.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base md:text-lg text-muted-foreground">
-          VibeCoding 6.0 is the June online hackathon for builders who turn one focused idea
+          VibeCoding Hackathon 6.0 is the July online hackathon for builders who turn one focused idea
           into a working public web product. Organized by{" "}
-          <a href="https://nxtgensec.org" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold transition hover:text-india-green">NxtGenSec</a> in collaboration
-          with <a href="https://www.ignitioninaiera.space" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold transition hover:text-saffron">IgnitionInAiEra</a>.
+          <a href="https://nxtgensec.org" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold transition hover:text-india-green">NxtGenSec (Next Generation Security)</a>.
         </p>
 
         <div className="mt-10 inline-flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-card/60 backdrop-blur p-6 shadow-[var(--shadow-elevate)]">
           <div className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
             Kickoff in
           </div>
-          <div className="flex gap-3 md:gap-5">
+          <div className="grid w-full max-w-sm grid-cols-4 gap-2 md:max-w-none md:flex md:gap-5">
             {[
               ["Days", d],
               ["Hours", h],
@@ -287,9 +286,9 @@ function Hero() {
             ].map(([label, val]) => (
               <div
                 key={label as string}
-                className="min-w-[72px] rounded-xl border border-white/10 bg-ink-2/60 px-3 py-3"
+                className="min-w-0 rounded-xl border border-white/10 bg-ink-2/60 px-2 py-3 md:min-w-[72px] md:px-3"
               >
-                <div className="font-display text-3xl md:text-4xl font-bold tabular-nums">
+                <div className="font-display text-2xl font-bold tabular-nums md:text-4xl">
                   {String(val).padStart(2, "0")}
                 </div>
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
@@ -299,7 +298,7 @@ function Hero() {
             ))}
           </div>
           <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
-            <Clock className="size-3.5" /> June 27, 10:00 AM IST · 48-hour sprint
+            <Clock className="size-3.5" /> July 25-27, 2026 · Final submission: July 27, 11:49 PM IST
           </div>
         </div>
 
@@ -310,7 +309,7 @@ function Hero() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110 transition shadow-[var(--shadow-saffron)]"
           >
-            Register for June 6.0 <ExternalLink className="size-4" />
+            Register for July 6.0 <ExternalLink className="size-4" />
           </a>
           <a
             href="#about"
@@ -362,7 +361,7 @@ function About() {
     { icon: Sparkles, title: "Open Innovation Track", text: "Pick a real problem and ship a working web product with clear user value." },
     { icon: Globe2, title: "Online & Accessible", text: "Open to students, professionals, and independent builders from anywhere." },
     { icon: Users, title: "Solo Or Team", text: "Join solo or with a team of up to 4. Keep the team lean and shipping-focused." },
-    { icon: Rocket, title: "2-Day Sprint", text: "A 48-hour build window on 27th & 28th June — fast execution, real demos." },
+    { icon: Rocket, title: "3-Day Sprint", text: "Build across July 25, 26, and 27, then submit your project by July 27 at 11:49 PM IST." },
   ];
   return (
     <section id="about" className="py-24 px-6">
@@ -412,7 +411,7 @@ function Problem() {
               </div>
               <h3 className="font-display text-2xl md:text-3xl font-bold">
                 The official problem statement will be announced by{" "}
-                <span className="tricolor-text">NxtGenSec</span> at kickoff on June 27, 10:00 AM IST.
+                <span className="tricolor-text">NxtGenSec (Next Generation Security)</span> at kickoff on July 25, 10:00 AM IST.
               </h3>
               <p className="mt-4 text-muted-foreground">
                 Open theme — pick a real problem you care about and ship a publicly deployed,
@@ -447,12 +446,13 @@ function Problem() {
 function Timeline() {
   const steps = [
     ["Registration Opens", "June 1"],
-    ["Builder Prep Window", "June 8 – 20"],
-    ["Registration Closes", "June 25"],
-    ["Kickoff — Day 1", "June 27, 10 AM"],
-    ["Submission Deadline", "June 28, 11:59 PM"],
-    ["Evaluation Period", "June 29 – 30"],
-    ["Results Announcement", "July 1"],
+    ["Builder Prep Window", "July 8-24"],
+    ["Hackathon Day 1", "July 25"],
+    ["Hackathon Day 2", "July 26"],
+    ["Hackathon Day 3", "July 27"],
+    ["Final Submission", "July 27, 11:49 PM"],
+    ["Evaluation Period", "July 28-29"],
+    ["Final Result Announcement", "July 31"],
   ];
   return (
     <section id="timeline" className="py-24 px-6">
@@ -460,7 +460,7 @@ function Timeline() {
         <SectionHeading
           eyebrow="Schedule"
           title="Hackathon Timeline"
-          sub="June 2026 — every milestone you need to plan around."
+          sub="July 2026 - every milestone you need to plan around."
         />
         <div className="relative pl-8 md:pl-12">
           <div className="absolute left-2 md:left-4 top-2 bottom-2 w-[3px] rounded-full tricolor-bar" />
@@ -517,13 +517,13 @@ function Process() {
     {
       icon: Rocket,
       title: "Hackathon Begins",
-      text: "Approved teams enter the 48-hour build window and ship a working, publicly deployed project.",
+      text: "Approved teams build across July 25, 26, and 27, then submit a working, publicly deployed project.",
       accent: "saffron",
     },
     {
       icon: Trophy,
       title: "Evaluation & Results",
-      text: "Submissions are reviewed for usefulness, execution, clarity, and demo quality. Winners announced July 1.",
+      text: "Submissions are reviewed on July 28-29 for usefulness, execution, clarity, and demo quality. Final results are announced July 31.",
       accent: "green",
     },
   ];
@@ -577,7 +577,7 @@ function Benefits() {
     { icon: BookOpen, title: "Dev Resources", front: "Templates & launch kits", back: "Curated templates, checklists, and launch resources for all approved participants." },
     { icon: Headphones, title: "Mentor Support", front: "Guidance during the sprint", back: "Get help on scope, product clarity, technical tradeoffs, and final presentation." },
     { icon: Briefcase, title: "Opportunity Pipeline", front: "Internships & collabs", back: "Outstanding participants may be considered for internships and collaboration offers." },
-    { icon: Star, title: "Project Showcase", front: "Featured by NxtGenSec", back: "Strong projects are hosted or featured through NxtGenSec community channels." },
+    { icon: Star, title: "Project Showcase", front: "Featured by NxtGenSec (Next Generation Security)", back: "Strong projects are hosted or featured through NxtGenSec (Next Generation Security) community channels." },
     { icon: Trophy, title: "Winner Recognition", front: "Spotlight across community", back: "Top teams get highlighted with prize and certificate support across our network." },
     { icon: Network, title: "Builder Network", front: "Practical, fast-moving devs", back: "Connect with a growing community of shipping-focused Indian builders." },
     { icon: FileCode2, title: "Portfolio Proof", front: "Public repo + live demo", back: "Leave with a public repo, deployed demo, and a real story you can show beyond the event." },
@@ -626,57 +626,35 @@ function Benefits() {
   );
 }
 
-function PastHackathons() {
-  const editions = [
-    { name: "January 2026 Poster", mode: "Mode: Individual Participation", winner: "TV Geethika", runner: "B. Manoj Kumar", poster: janPoster },
-    { name: "February 2026 Poster", mode: "Mode: Team Based", winner: "GenZ", runner: "TechNova", poster: febPoster },
-    { name: "March 2026 Poster", mode: "Mode: Online Hackathon", winner: "Dynamic Duo", runner: "Code Queens", poster: marPoster },
-    { name: "April 2026 Poster", mode: "Mode: Team Based - VibeCoding 4.0", winner: "Team Tech Titans", runner: "Cyber Techie", poster: aprPoster },
-    { name: "May 2026 Poster", mode: "Mode: Online - VibeCoding 5.0", winner: "Rockers", runner: "Unstoppable", poster: mayPoster },
+function Collaborators() {
+  const collaborators = [
+    { name: "IgnitionInAiEra", logo: "IA", tone: "from-saffron/35 to-india-green/25" },
+    { name: "Builder Circle", logo: "BC", tone: "from-chakra/35 to-saffron/25" },
+    { name: "AI Launchpad", logo: "AI", tone: "from-india-green/35 to-chakra/25" },
+    { name: "Code Campus", logo: "CC", tone: "from-saffron/30 to-chakra/25" },
+    { name: "Startup Studio", logo: "SS", tone: "from-india-green/30 to-saffron/25" },
   ];
+
   return (
-    <section id="past" className="py-24 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent">
+    <section id="collaborators" className="py-20 px-6">
       <div className="mx-auto max-w-7xl">
         <SectionHeading
-          eyebrow="Hall of Fame"
-          title="Past Hackathons"
-          sub="5 editions completed · 1000+ builders across India · growing every month."
+          eyebrow="Network"
+          title="Collaborators"
+          sub="Demo collaborator entries are shown for now. Replace the logo and name data when final collaborators are confirmed."
         />
-        <div className="overflow-hidden">
-          <div className="marquee-past-hackathons flex w-max items-stretch gap-5">
-            {[...editions, ...editions].map((e, index) => (
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink/35 p-3 shadow-[var(--shadow-elevate)]">
+          <div className="marquee-collaborators-ltr flex w-max items-stretch gap-4">
+            {[...collaborators, ...collaborators].map((c, index) => (
               <div
-                key={`${e.name}-${index}`}
-                className="group w-[250px] shrink-0 rounded-2xl overflow-hidden border border-white/10 bg-card/60 backdrop-blur hover:-translate-y-1 hover:border-saffron/40 transition shadow-[var(--shadow-elevate)] sm:w-[280px]"
+                key={`${c.name}-${index}`}
+                className="grid w-[170px] shrink-0 place-items-center gap-3 rounded-xl border border-white/10 bg-card/70 px-4 py-5 text-center shadow-[var(--shadow-elevate)] backdrop-blur transition hover:-translate-y-1 hover:border-saffron/40 sm:w-[200px]"
               >
-                <div className="relative aspect-[4/5] overflow-hidden bg-ink">
-                  <img
-                    src={e.poster}
-                    alt={`${e.name} VibeCoding poster`}
-                    loading="lazy"
-                    width={832}
-                    height={1056}
-                    className="size-full object-contain p-2 transition-transform duration-700 group-hover:scale-[1.02]"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink/85 to-transparent" />
-                  <div className="absolute top-3 left-3 text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-black/60 backdrop-blur border border-white/10">
-                    {e.mode}
-                  </div>
+                <div className={`grid size-16 place-items-center rounded-2xl bg-gradient-to-br ${c.tone} text-lg font-bold text-foreground ring-1 ring-white/10 sm:size-20 sm:text-xl`}>
+                  {c.logo}
                 </div>
-                <div className="p-5">
-                  <div className="font-display font-semibold">{e.name}</div>
-                  <div className="mt-3 space-y-1.5 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Trophy className="size-3.5 text-saffron" />
-                      <span className="text-muted-foreground">Winner</span>
-                      <span className="ml-auto font-medium">{e.winner}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Award className="size-3.5 text-india-green" />
-                      <span className="text-muted-foreground">Runner Up</span>
-                      <span className="ml-auto font-medium">{e.runner}</span>
-                    </div>
-                  </div>
+                <div className="min-h-10 text-sm font-semibold leading-tight sm:text-base">
+                  {c.name}
                 </div>
               </div>
             ))}
@@ -687,13 +665,250 @@ function PastHackathons() {
   );
 }
 
+function PastHackathonsShowcase() {
+  const editions = [
+    { name: "January 2026", mode: "Individual Participation", winner: "TV Geethika", runner: "B. Manoj Kumar", poster: janPoster, note: "The opening edition focused on individual builders proving product clarity, speed, and working demos." },
+    { name: "February 2026", mode: "Team Based", winner: "GenZ", runner: "TechNova", poster: febPoster, note: "Teams collaborated on practical web ideas with stronger execution and presentation quality." },
+    { name: "March 2026", mode: "Online Hackathon", winner: "Dynamic Duo", runner: "Code Queens", poster: marPoster, note: "The online edition expanded reach and brought in fast-moving builders from different cities." },
+    { name: "April 2026", mode: "Team Based - VibeCoding 4.0", winner: "Team Tech Titans", runner: "Cyber Techie", poster: aprPoster, note: "VibeCoding 4.0 pushed teams toward sharper problem framing and public project demos." },
+    { name: "May 2026", mode: "Online - VibeCoding 5.0", winner: "Rockers", runner: "Unstoppable", poster: mayPoster, note: "The fifth edition strengthened the monthly builder community and celebrated consistent shipping." },
+  ];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const active = editions[activeIndex];
+
+  useEffect(() => {
+    const timer = window.setInterval(
+      () => setActiveIndex((current) => (current + 1) % editions.length),
+      3200,
+    );
+    return () => window.clearInterval(timer);
+  }, [editions.length]);
+
+  return (
+    <section id="past" className="py-20 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading
+          eyebrow="Hall of Fame"
+          title="Past Hackathons"
+          sub="Past editions, standout builders, and the momentum behind the VibeCoding community."
+        />
+
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(340px,1fr)] lg:items-stretch">
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink/35 p-2.5 shadow-[var(--shadow-elevate)]">
+            <div
+              className="flex transition-transform duration-700 ease-out"
+              style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+            >
+              {editions.map((e) => (
+                <div key={e.name} className="w-full shrink-0 px-1">
+                  <div className="overflow-hidden rounded-xl border border-white/10 bg-black">
+                    <div className="grid h-[330px] place-items-center sm:h-[390px] lg:h-[430px]">
+                      <img
+                        src={e.poster}
+                        alt={`${e.name} VibeCoding poster`}
+                        loading="lazy"
+                        width={832}
+                        height={1056}
+                        className="size-full object-contain"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex justify-center gap-2">
+              {editions.map((e, index) => (
+                <button
+                  key={e.name}
+                  type="button"
+                  aria-label={`Show ${e.name}`}
+                  onClick={() => setActiveIndex(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    activeIndex === index ? "w-8 bg-saffron" : "w-2 bg-white/25 hover:bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-5 shadow-[var(--shadow-elevate)] backdrop-blur md:p-6">
+            <div className="absolute -right-20 -top-20 size-60 opacity-10">
+              <AshokaChakra className="text-chakra chakra-spin" size={240} />
+            </div>
+            <div className="relative">
+              <div className="text-[10px] uppercase tracking-[0.24em] text-saffron">
+                Active Edition
+              </div>
+              <h3 className="mt-2 font-display text-2xl font-bold md:text-3xl">
+                {active.name}
+              </h3>
+              <div className="mt-2 inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                {active.mode}
+              </div>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                {active.note}
+              </p>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <div className="rounded-xl border border-saffron/30 bg-saffron/10 p-3">
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                    <Trophy className="size-4 text-saffron" />
+                    Winner
+                  </div>
+                  <div className="mt-2 font-display text-lg font-semibold leading-tight">{active.winner}</div>
+                </div>
+                <div className="rounded-xl border border-india-green/30 bg-india-green/10 p-3">
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                    <Award className="size-4 text-india-green" />
+                    Runner Up
+                  </div>
+                  <div className="mt-2 font-display text-lg font-semibold leading-tight">{active.runner}</div>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">
+                  <CheckCircle2 className="size-4 text-india-green" />
+                  Public demos
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">
+                  <CheckCircle2 className="size-4 text-india-green" />
+                  Strong execution
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5">
+                  <CheckCircle2 className="size-4 text-india-green" />
+                  Builder network
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PastHackathons() {
+  const editions = [
+    { name: "January 2026 Poster", mode: "Mode: Individual Participation", winner: "TV Geethika", runner: "B. Manoj Kumar", poster: janPoster },
+    { name: "February 2026 Poster", mode: "Mode: Team Based", winner: "GenZ", runner: "TechNova", poster: febPoster },
+    { name: "March 2026 Poster", mode: "Mode: Online Hackathon", winner: "Dynamic Duo", runner: "Code Queens", poster: marPoster },
+    { name: "April 2026 Poster", mode: "Mode: Team Based - VibeCoding 4.0", winner: "Team Tech Titans", runner: "Cyber Techie", poster: aprPoster },
+    { name: "May 2026 Poster", mode: "Mode: Online - VibeCoding 5.0", winner: "Rockers", runner: "Unstoppable", poster: mayPoster },
+  ];
+  return (
+    <section id="past" className="py-20 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading
+          eyebrow="Hall of Fame"
+          title="Past Hackathons"
+          sub="5 editions completed · 1000+ builders across India · growing every month."
+        />
+        <div className="hidden overflow-hidden rounded-2xl border border-white/10 bg-ink/35 p-3 shadow-[var(--shadow-elevate)] sm:block">
+          <div className="marquee-past-hackathons flex w-max items-stretch gap-4">
+            {[...editions, ...editions].map((e, index) => (
+              <div
+                key={`${e.name}-${index}`}
+                className="group w-[280px] shrink-0 overflow-hidden rounded-xl border border-white/10 bg-card/70 shadow-[var(--shadow-elevate)] backdrop-blur transition hover:-translate-y-1 hover:border-saffron/40"
+              >
+                <div className="grid aspect-[4/5] place-items-center bg-black">
+                  <img
+                    src={e.poster}
+                    alt={`${e.name} VibeCoding poster`}
+                    loading="lazy"
+                    width={832}
+                    height={1056}
+                    className="size-full object-contain transition-transform duration-700 group-hover:scale-[1.015]"
+                  />
+                </div>
+                <div className="grid min-h-[190px] gap-4 p-4">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.2em] text-saffron">
+                      {e.mode}
+                    </div>
+                    <div className="mt-2 font-display text-lg font-semibold leading-tight">
+                      {e.name}
+                    </div>
+                    <div className="mt-3 h-px w-16 tricolor-bar" />
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div className="grid gap-1 rounded-lg border border-white/8 bg-white/[0.03] p-3">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Trophy className="size-3.5 text-saffron" />
+                        Winner
+                      </div>
+                      <div className="font-semibold leading-tight">{e.winner}</div>
+                    </div>
+                    <div className="grid gap-1 rounded-lg border border-white/8 bg-white/[0.03] p-3">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Award className="size-3.5 text-india-green" />
+                        Runner Up
+                      </div>
+                      <div className="font-semibold leading-tight">{e.runner}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="grid gap-4 sm:hidden">
+          {editions.map((e) => (
+            <div
+              key={e.name}
+              className="overflow-hidden rounded-xl border border-white/10 bg-card/70 shadow-[var(--shadow-elevate)]"
+            >
+              <div className="grid aspect-[4/5] place-items-center bg-black">
+                <img
+                  src={e.poster}
+                  alt={`${e.name} VibeCoding poster`}
+                  loading="lazy"
+                  width={832}
+                  height={1056}
+                  className="size-full object-contain"
+                />
+              </div>
+              <div className="grid gap-3 p-4">
+                <div>
+                  <div className="text-[9px] uppercase tracking-[0.16em] text-saffron">
+                    {e.mode}
+                  </div>
+                  <div className="mt-2 font-display text-base font-semibold leading-tight">
+                    {e.name}
+                  </div>
+                </div>
+                <div className="space-y-2 text-xs">
+                  <div className="rounded-lg border border-white/8 bg-white/[0.03] p-3">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Trophy className="size-3.5 text-saffron" />
+                      Winner
+                    </div>
+                    <div className="mt-1 font-semibold leading-tight">{e.winner}</div>
+                  </div>
+                  <div className="rounded-lg border border-white/8 bg-white/[0.03] p-3">
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Award className="size-3.5 text-india-green" />
+                      Runner Up
+                    </div>
+                    <div className="mt-1 font-semibold leading-tight">{e.runner}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Faq() {
   const faqs = [
-    ["Is there a registration fee to participate?", "No. The June edition is completely free for all accepted participants. There is no registration fee."],
+    ["Is there a registration fee to participate?", "No. The July edition is completely free for all accepted participants. There is no registration fee."],
     ["Can I participate as an individual?", "Yes. You can register solo or join with a team of up to 4 — a team counts as one registration slot."],
     ["What is the team size limit?", "Up to 4 members per team. Keep the team lean and shipping-focused."],
-    ["What is the problem statement?", "The official problem statement is announced by NxtGenSec at kickoff on June 27, 10:00 AM IST. The hackathon is open-theme — pick a real problem and ship a public web product."],
-    ["When does the hackathon start and end?", "Kickoff: June 27, 10:00 AM IST. Submission deadline: June 28, 11:59 PM IST. A 48-hour sprint."],
+    ["What is the problem statement?", "The official problem statement is announced by NxtGenSec (Next Generation Security) at kickoff on July 25, 10:00 AM IST. The hackathon is open-theme - pick a real problem and ship a public web product."],
+    ["When does the hackathon start and end?", "Hackathon days are July 25, 26, and 27, 2026. Final project submission is due on July 27 at 11:49 PM IST."],
     ["What should the final submission include?", "A publicly deployed, usable web product + public repository + short demo. Judging prioritises usefulness, execution, clarity, and demo quality."],
     ["Will there be technical support during the hackathon?", "Yes. Approved participants are added to a dedicated WhatsApp group for kickoff, mentor support, and final evaluation."],
     ["What prizes will be awarded?", "A prize pool of ₹10,000+, participation certificates, project showcase, and opportunities for internships and collaborations."],
@@ -781,14 +996,17 @@ function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-12 grid gap-10 md:grid-cols-3">
         <div>
           <div className="flex items-center gap-2">
-            <div className="relative size-9 rounded-lg tricolor-bar grid place-items-center">
-              <div className="absolute inset-0.5 rounded-md bg-ink" />
-              <span className="relative text-primary font-bold font-display">N</span>
-            </div>
-            <div className="font-display font-bold">NxtGenSec</div>
+            <img
+              src={nxtGenSecLogo}
+              alt="NxtGenSec (Next Generation Security) logo"
+              width={40}
+              height={40}
+              className="size-10 rounded-lg bg-black object-contain p-0.5 shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
+            />
+            <div className="font-display font-bold">NxtGenSec (Next Generation Security)</div>
           </div>
           <p className="mt-4 text-sm text-muted-foreground max-w-xs">
-            NxtGenSec runs focused monthly hackathons where Indian builders solve practical
+            NxtGenSec (Next Generation Security) runs focused monthly hackathons where Indian builders solve practical
             problems and ship production-ready ideas.
           </p>
         </div>
@@ -821,11 +1039,11 @@ function Footer() {
       </div>
       <div className="border-t border-white/5">
         <div className="mx-auto max-w-7xl px-6 py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-          <div>© 2026 NxtGenSec. All rights reserved.</div>
+          <div>© 2026 NxtGenSec (Next Generation Security). All rights reserved.</div>
           <div className="flex items-center gap-2">
             <span className="font-display font-semibold text-foreground">VIBECODING</span>
             <span className="opacity-40">|</span>
-            <span>June 6.0 · 2026</span>
+            <span>July 6.0 · 2026</span>
           </div>
         </div>
       </div>
