@@ -1,98 +1,149 @@
-# VibeCoding 6.0
+# VibeCoding Hackathon 6.0
 
-VibeCoding Hackathon 6.0 is a responsive event website for the July 2026 NxtGenSec (Next Generation Security) monthly online hackathon. It presents the hackathon story, registration flow, timeline, benefits, previous edition highlights, FAQs, and final call to action in a single polished landing experience.
+VibeCoding Hackathon 6.0 is the official July 2026 event website for NxtGenSec (Next Generation Security). The site presents the hackathon, timeline, benefits, collaborators, past editions, FAQs, public registration workflow, and a protected admin dashboard for managing registrations.
 
-The project is built with React, TanStack Router/Start, Vite, Tailwind CSS, shadcn-style UI primitives, and Lucide icons. It is designed as a dark, premium event page with Indian tricolor accents, Ashoka Chakra motion details, NxtGenSec (Next Generation Security) branding, and mobile-first navigation.
+The project is built as a polished event experience with a dark premium interface, Indian tricolor accents, Ashoka Chakra visual detail, NxtGenSec (Next Generation Security) branding, mobile-first navigation, Supabase-backed registration, and manual admin approval.
 
-## What The Website Contains
+## Main Features
 
-- Fixed desktop navigation with NxtGenSec (Next Generation Security) branding, anchor links, and a registration button.
-- Premium mobile bottom navigation for Home, Timeline, Register, Benefits, and FAQs.
-- Hero section with centered Ashoka Chakra background, countdown timer, hackathon value proposition, and registration actions.
-- About section explaining the event format and participation model.
-- Problem statement section describing the kickoff reveal and judging priorities.
-- Timeline section listing all important July 2026 milestones.
-- Registration process section explaining form submission, LinkedIn repost, approval, WhatsApp group access, build window, and evaluation.
-- Benefits section with prize pool highlight and flip cards for certificates, mentors, resources, opportunities, showcase, and networking.
-- Collaborators section with replaceable demo logo/name data displayed in a flowing carousel.
-- Past Hackathons section with a left-side poster carousel and a dynamic right-side detail panel that updates winner and runner-up information.
-- FAQ accordion for common participant questions.
-- Final CTA and footer with quick links and contact details.
+- Responsive landing page for VibeCoding Hackathon 6.0.
+- Desktop navigation and premium mobile bottom navigation.
+- Hero section with countdown to July 25, 2026.
+- July 2026 timeline with registration, hackathon, evaluation, and results dates.
+- Popup registration dialog with dynamic participant type and team-size logic.
+- Registration support for student and professional participants.
+- Team size support for solo, duo, trio, and squad registrations.
+- Automatic duplicate protection for team names and participant emails.
+- Manual verification message explaining WhatsApp group access after approval.
+- Collaborators carousel with demo data ready to replace.
+- Past Hackathons showcase with poster carousel and dynamic winner/runner-up panel.
+- Protected `/admin` dashboard using Supabase Auth.
+- Admin filters for all, student, professional, solo, duo, trio, squad, and status views.
+- Admin actions to approve, disapprove, edit, and delete registrations.
+- Supabase SQL schema with RLS policies, admin whitelist, RPC functions, and uniqueness rules.
 
 ## Tech Stack
 
-- React 19 for the UI.
-- TanStack Router and TanStack Start for routing and app structure.
-- Vite for development and production builds.
-- Tailwind CSS 4 for styling.
-- Radix UI primitives through local `src/components/ui` components.
-- Lucide React for icons.
-- TypeScript for type-safe app code.
+- React 19
+- TanStack Router / TanStack Start
+- Vite
+- TypeScript
+- Tailwind CSS 4
+- shadcn/Radix UI primitives
+- Lucide React icons
+- Supabase JavaScript SDK
+- Supabase Auth, Postgres, RLS, and RPC functions
+- Bun for package management and scripts
 
 ## Project Structure
 
 ```text
 .
+├── .env.example
 ├── README.md
 ├── package.json
-├── vite.config.ts
-├── tsconfig.json
-├── vercel.json
+├── bun.lock
+├── supabase
+│   └── schema.sql
 ├── src
 │   ├── assets
 │   │   ├── nxtgensec-logo.png
 │   │   └── posters
-│   │       ├── january-2026.jpg
-│   │       ├── february-2026.jpg
-│   │       ├── march-2026.jpg
-│   │       ├── april-2026.jpeg
-│   │       └── may-2026.jpeg
 │   ├── components
 │   │   ├── AshokaChakra.tsx
+│   │   ├── RegistrationSection.tsx
 │   │   └── ui
-│   ├── hooks
 │   ├── lib
+│   │   ├── registration.ts
+│   │   ├── supabase.ts
+│   │   └── utils.ts
 │   ├── routes
 │   │   ├── __root.tsx
+│   │   ├── admin.tsx
 │   │   └── index.tsx
 │   ├── router.tsx
 │   ├── routeTree.gen.ts
-│   ├── server.ts
 │   ├── start.ts
 │   └── styles.css
-└── components.json
+├── vercel.json
+├── vite.config.ts
+└── tsconfig.json
 ```
 
 ## Important Files
 
-- `src/routes/index.tsx`: Main page content and layout. Most event sections, navigation links, countdown logic, poster data, and CTA URLs live here.
-- `src/styles.css`: Global theme tokens, Tailwind imports, dark event styling, tricolor utilities, animations, flip-card behavior, and marquee animation.
-- `src/components/AshokaChakra.tsx`: Reusable SVG Ashoka Chakra component used as decorative event branding.
-- `src/assets/nxtgensec-logo.png`: NxtGenSec (Next Generation Security) logo used in the navbar and footer.
-- `src/assets/posters`: Past hackathon poster images used in the Hall of Fame section.
-- `src/components/ui`: Reusable UI primitives such as accordion, button, card, dialog, input, tooltip, and other shadcn/Radix-based components.
-- `vercel.json`: Deployment configuration for Vercel.
+- `src/routes/index.tsx`: Main event page, navigation, hero, timeline, process, collaborators, past hackathons, FAQ, footer, and CTA sections.
+- `src/components/RegistrationSection.tsx`: Public registration dialog. Handles student/professional mode, solo/duo/trio/squad teams, client validation, Supabase RPC submission, and duplicate-friendly error messages.
+- `src/routes/admin.tsx`: Protected admin dashboard at `/admin`. Handles Supabase email/password login, filters, metrics, approval/disapproval, editing, and deletion.
+- `src/lib/supabase.ts`: Supabase browser client initialized from Vite environment variables.
+- `src/lib/registration.ts`: Shared registration constants, types, team-size logic, and status helpers.
+- `supabase/schema.sql`: Complete database schema, constraints, RLS policies, admin whitelist table, and RPC functions.
+- `.env.example`: Required environment variable template.
+- `src/styles.css`: Global theme, tricolor utilities, animation utilities, dark interface tokens, flip cards, and marquees.
 
-## Main Configuration Values
-
-In `src/routes/index.tsx`:
-
-- `GOOGLE_FORM_URL`: Registration form URL. Replace the placeholder with the real Google Form link before launch.
-- `LINKEDIN_POST_URL`: Official LinkedIn/company URL used by the CTA.
-- `NAV`: Desktop navigation anchors.
-- `MOBILE_NAV`: Mobile bottom navigation labels, icons, and destinations.
-- `PastHackathons.editions`: Poster, winner, runner-up, and mode data for previous hackathons.
-- `useCountdown(new Date("2026-07-25T10:00:00+05:30"))`: Hackathon kickoff countdown target.
-
-## July 2026 Event Schedule
+## Event Schedule
 
 - June 1, 2026: Registrations open.
 - July 25, 2026: Hackathon Day 1.
 - July 26, 2026: Hackathon Day 2.
-- July 27, 2026: Hackathon Day 3 and final project submission.
-- July 27, 2026 at 11:49 PM IST: Final submission deadline.
+- July 27, 2026: Hackathon Day 3.
+- July 27, 2026 at 11:49 PM IST: Final project submission.
 - July 28-29, 2026: Evaluation and top performer selection.
 - July 31, 2026: Final result announcement.
+
+## Supabase Setup
+
+1. Create a Supabase project.
+2. Open the Supabase SQL Editor.
+3. Run the full SQL in `supabase/schema.sql`.
+4. Create an admin user in Supabase Authentication using email and password.
+5. Add that same admin email to the `admin_users` table:
+
+```sql
+insert into public.admin_users (email)
+values ('your-admin-email@example.com');
+```
+
+6. Copy `.env.example` to `.env.local` and fill in your Supabase values:
+
+```bash
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-or-publishable-key
+```
+
+7. Restart the local dev server after changing environment variables.
+
+## Registration Rules
+
+- Every team must have a unique team name.
+- Every participant email must be globally unique across all teams.
+- Team lead details include name, email, phone, LinkedIn profile, LinkedIn repost URL, affiliation, and optional note.
+- Additional participants provide name, email, LinkedIn profile, and LinkedIn repost URL.
+- Registration status starts as `pending`.
+- Admins manually approve or disapprove teams after verification.
+- Approved participants are told they will be added to the WhatsApp group after verification.
+
+## Admin Dashboard
+
+Visit:
+
+```text
+/admin
+```
+
+The admin dashboard supports:
+
+- Email/password login through Supabase Auth.
+- All registrations view.
+- Student/professional filters.
+- Solo/duo/trio/squad filters.
+- Pending/approved/disapproved filters.
+- Search by team, lead, or email.
+- Quick approve and disapprove actions.
+- Full registration editing.
+- Registration deletion.
+
+Only users in the `admin_users` table can read or manage registration data.
 
 ## Local Development
 
@@ -128,22 +179,14 @@ bun run lint
 
 ## Deployment
 
-The project includes `vercel.json` and can be deployed to Vercel. Build output is produced through the configured Vite/TanStack Start setup. Before deployment, update the registration form URL and verify all official links.
+The project is ready for Vercel deployment through the existing `vercel.json` and Vite/TanStack Start build setup. Add the same Supabase environment variables in the deployment platform before publishing.
 
-## Content Update Guide
+## Maintenance Notes
 
-To change event dates, edit the timeline array and countdown target in `src/routes/index.tsx`.
-
-To change registration behavior, update `GOOGLE_FORM_URL`.
-
-To update previous hackathon posters, place new images in `src/assets/posters` and update the `editions` array in `PastHackathonsShowcase`.
-
-To update brand assets, replace `src/assets/nxtgensec-logo.png` with the latest logo and keep the same filename, or update the import in `src/routes/index.tsx`.
-
-To adjust colors, shadows, gradients, and animation utilities, edit `src/styles.css`.
-
-## Notes For Future Maintainers
-
-The page is intentionally implemented as a single route because the website is a focused event landing page. This keeps the content easy to audit before launch and makes anchor navigation predictable across desktop and mobile. Shared primitives remain in `src/components/ui`, while event-specific sections stay in `src/routes/index.tsx`.
-
-The project currently uses a placeholder Google Form URL. Replace it before public release.
+- Update timeline content in `src/routes/index.tsx`.
+- Update registration behavior in `src/components/RegistrationSection.tsx`.
+- Update admin workflow in `src/routes/admin.tsx`.
+- Update registration types and team-size/status options in `src/lib/registration.ts`.
+- Update database tables, policies, or RPC functions in `supabase/schema.sql`.
+- Replace collaborator demo data in the `Collaborators` section of `src/routes/index.tsx`.
+- Replace past hackathon poster assets inside `src/assets/posters` and update the `PastHackathonsShowcase` data.

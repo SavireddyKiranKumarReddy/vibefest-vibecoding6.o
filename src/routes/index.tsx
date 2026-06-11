@@ -7,6 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { AshokaChakra } from "@/components/AshokaChakra";
+import { RegistrationDialog, openRegistrationDialog } from "@/components/RegistrationSection";
 import {
   Calendar,
   Users,
@@ -27,7 +28,6 @@ import {
   CheckCircle2,
   Clock,
   Mail,
-  ExternalLink,
   Home,
   CalendarRange,
   Gem,
@@ -42,8 +42,6 @@ import marPoster from "@/assets/posters/march-2026.jpg";
 import aprPoster from "@/assets/posters/april-2026.jpeg";
 import mayPoster from "@/assets/posters/may-2026.jpeg";
 
-// TODO: Replace with the actual Google Form URL when provided.
-const GOOGLE_FORM_URL = "https://forms.gle/your-google-form-id";
 const LINKEDIN_POST_URL = "https://www.linkedin.com/company/nxtgensec/";
 
 export const Route = createFileRoute("/")({
@@ -55,7 +53,10 @@ export const Route = createFileRoute("/")({
         content:
           "VibeCoding Hackathon 6.0 by NxtGenSec (Next Generation Security) is the July 2026 online hackathon. Registration starts June 1. Build on July 25, 26, and 27. Final submission is due July 27 at 11:49 PM IST.",
       },
-      { property: "og:title", content: "VibeCoding Hackathon 6.0 - NxtGenSec (Next Generation Security)" },
+      {
+        property: "og:title",
+        content: "VibeCoding Hackathon 6.0 - NxtGenSec (Next Generation Security)",
+      },
       {
         property: "og:description",
         content:
@@ -79,11 +80,11 @@ const NAV = [
 ];
 
 const MOBILE_NAV = [
-  { label: "Home", id: "top", icon: Home },
-  { label: "Timeline", id: "timeline", icon: CalendarRange },
-  { label: "Register", href: GOOGLE_FORM_URL, icon: UserPlus, primary: true },
-  { label: "Benefits", id: "benefits", icon: Gem },
-  { label: "FAQs", id: "faq", icon: HelpCircle },
+  { label: "Home", href: "#top", icon: Home },
+  { label: "Timeline", href: "#timeline", icon: CalendarRange },
+  { label: "Register", icon: UserPlus, primary: true },
+  { label: "Benefits", href: "#benefits", icon: Gem },
+  { label: "FAQs", href: "#faq", icon: HelpCircle },
 ];
 
 function Index() {
@@ -91,6 +92,7 @@ function Index() {
     <div className="min-h-screen pb-24 text-foreground md:pb-0">
       <Nav />
       <MobileBottomNav />
+      <RegistrationDialog />
       <Hero />
       <TricolorDivider />
       <About />
@@ -109,14 +111,13 @@ function Index() {
 
 function registerLink(className = "") {
   return (
-    <a
-      href={GOOGLE_FORM_URL}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      onClick={openRegistrationDialog}
       className={`inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-saffron)] transition hover:brightness-110 ${className}`}
     >
-      Register <ExternalLink className="size-4" />
-    </a>
+      Register <UserPlus className="size-4" />
+    </button>
   );
 }
 
@@ -132,7 +133,7 @@ function Nav() {
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all ${
         scrolled
-          ? "backdrop-blur-xl bg-[oklch(0.13_0.015_260/0.75)] border-b border-white/5"
+          ? "backdrop-blur-xl bg-[oklch(0.13_0.015_260/0.75)] shadow-[0_18px_50px_-32px_oklch(0_0_0/0.9)]"
           : "bg-transparent"
       }`}
     >
@@ -189,7 +190,6 @@ function MobileBottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 md:hidden">
       <div className="relative grid h-[76px] grid-cols-5 items-center overflow-hidden rounded-t-2xl border border-white/10 border-b-0 bg-[linear-gradient(180deg,oklch(0.19_0.02_260/0.98),oklch(0.115_0.014_260/0.99))] px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-18px_60px_-24px_oklch(0_0_0/0.95)] backdrop-blur-2xl">
-        <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         {MOBILE_NAV.map((item) => {
           const Icon = item.icon;
           const commonClasses = item.primary
@@ -198,11 +198,10 @@ function MobileBottomNav() {
 
           if (item.primary) {
             return (
-              <a
+              <button
                 key={item.label}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
+                type="button"
+                onClick={openRegistrationDialog}
                 className={commonClasses}
                 aria-label="Register for VibeCoding 6.0"
               >
@@ -212,12 +211,12 @@ function MobileBottomNav() {
                 <span className="text-[9px] font-semibold uppercase leading-none text-primary">
                   Register
                 </span>
-              </a>
+              </button>
             );
           }
 
           return (
-            <a key={item.label} href={`#${item.id}`} className={commonClasses}>
+            <a key={item.label} href={item.href} className={commonClasses}>
               <span className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/[0.045] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] transition group-hover:border-white/15 group-hover:bg-white/[0.07] group-hover:text-primary">
                 <Icon className="size-[17px]" strokeWidth={2.15} />
               </span>
@@ -256,21 +255,32 @@ function Hero() {
   return (
     <section id="top" className="relative overflow-hidden pt-28 pb-24 md:pt-32 grain">
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.07]">
-        <AshokaChakra className="chakra-spin h-auto w-[92vw] max-w-[780px] text-chakra" size={780} />
+        <AshokaChakra
+          className="chakra-spin h-auto w-[92vw] max-w-[780px] text-chakra"
+          size={780}
+        />
       </div>
       <div className="relative mx-auto max-w-6xl px-6 text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs uppercase tracking-widest text-muted-foreground">
           <span className="size-1.5 rounded-full bg-saffron pulse-glow" />
           India's First Monthly Vibecoding Hackathons
         </div>
-        <h1 className="mt-6 font-display text-[clamp(1.45rem,6.2vw,4.5rem)] font-bold leading-[1.06] sm:text-[clamp(3rem,5.5vw,4.5rem)]">
+        <h1 className="mt-6 font-display text-[clamp(1.15rem,5.8vw,4.5rem)] font-bold leading-[1.06] sm:text-[clamp(3rem,5.5vw,4.5rem)]">
           <span className="block whitespace-nowrap">Solve Real Problems.</span>
           <span className="block whitespace-nowrap tricolor-text">Build Fast. Get Recognized.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-base md:text-lg text-muted-foreground">
-          VibeCoding Hackathon 6.0 is the July online hackathon for builders who turn one focused idea
-          into a working public web product. Organized by{" "}
-          <a href="https://nxtgensec.org" target="_blank" rel="noopener noreferrer" className="text-foreground font-semibold transition hover:text-india-green">NxtGenSec (Next Generation Security)</a>.
+          VibeCoding Hackathon 6.0 is the July online hackathon for builders who turn one focused
+          idea into a working public web product. Organized by{" "}
+          <a
+            href="https://nxtgensec.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground font-semibold transition hover:text-india-green"
+          >
+            NxtGenSec (Next Generation Security)
+          </a>
+          .
         </p>
 
         <div className="mt-10 inline-flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-card/60 backdrop-blur p-6 shadow-[var(--shadow-elevate)]">
@@ -298,19 +308,19 @@ function Hero() {
             ))}
           </div>
           <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
-            <Clock className="size-3.5" /> July 25-27, 2026 · Final submission: July 27, 11:49 PM IST
+            <Clock className="size-3.5" /> July 25-27, 2026 · Final submission: July 27, 11:49 PM
+            IST
           </div>
         </div>
 
         <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <a
-            href={GOOGLE_FORM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={openRegistrationDialog}
             className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110 transition shadow-[var(--shadow-saffron)]"
           >
-            Register for July 6.0 <ExternalLink className="size-4" />
-          </a>
+            Register for July 6.0 <UserPlus className="size-4" />
+          </button>
           <a
             href="#about"
             className="inline-flex items-center gap-2 rounded-full border border-white/15 px-7 py-3.5 text-sm font-semibold hover:bg-white/5 transition"
@@ -320,32 +330,21 @@ function Hero() {
         </div>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
-          {[
-            "Solo / Team up to 4",
-            "Free Registration",
-            "Prize Pool ₹10,000+",
-            "Online Only",
-          ].map((f) => (
-            <div key={f} className="flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-india-green" />
-              {f}
-            </div>
-          ))}
+          {["Solo / Team up to 4", "Free Registration", "Prize Pool ₹10,000+", "Online Only"].map(
+            (f) => (
+              <div key={f} className="flex items-center gap-2">
+                <CheckCircle2 className="size-4 text-india-green" />
+                {f}
+              </div>
+            ),
+          )}
         </div>
       </div>
     </section>
   );
 }
 
-function SectionHeading({
-  eyebrow,
-  title,
-  sub,
-}: {
-  eyebrow: string;
-  title: string;
-  sub?: string;
-}) {
+function SectionHeading({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
   return (
     <div className="text-center max-w-3xl mx-auto mb-14">
       <div className="text-[11px] uppercase tracking-[0.3em] text-saffron mb-3">{eyebrow}</div>
@@ -358,10 +357,26 @@ function SectionHeading({
 
 function About() {
   const items = [
-    { icon: Sparkles, title: "Open Innovation Track", text: "Pick a real problem and ship a working web product with clear user value." },
-    { icon: Globe2, title: "Online & Accessible", text: "Open to students, professionals, and independent builders from anywhere." },
-    { icon: Users, title: "Solo Or Team", text: "Join solo or with a team of up to 4. Keep the team lean and shipping-focused." },
-    { icon: Rocket, title: "3-Day Sprint", text: "Build across July 25, 26, and 27, then submit your project by July 27 at 11:49 PM IST." },
+    {
+      icon: Sparkles,
+      title: "Open Innovation Track",
+      text: "Pick a real problem and ship a working web product with clear user value.",
+    },
+    {
+      icon: Globe2,
+      title: "Online & Accessible",
+      text: "Open to students, professionals, and independent builders from anywhere.",
+    },
+    {
+      icon: Users,
+      title: "Solo Or Team",
+      text: "Join solo or with a team of up to 4. Keep the team lean and shipping-focused.",
+    },
+    {
+      icon: Rocket,
+      title: "3-Day Sprint",
+      text: "Build across July 25, 26, and 27, then submit your project by July 27 at 11:49 PM IST.",
+    },
   ];
   return (
     <section id="about" className="py-24 px-6">
@@ -411,12 +426,12 @@ function Problem() {
               </div>
               <h3 className="font-display text-2xl md:text-3xl font-bold">
                 The official problem statement will be announced by{" "}
-                <span className="tricolor-text">NxtGenSec (Next Generation Security)</span> at kickoff on July 25, 10:00 AM IST.
+                <span className="tricolor-text">NxtGenSec (Next Generation Security)</span> at
+                kickoff on July 25, 10:00 AM IST.
               </h3>
               <p className="mt-4 text-muted-foreground">
-                Open theme — pick a real problem you care about and ship a publicly deployed,
-                usable web product. Judging prioritizes usefulness, execution, clarity, and
-                demo quality.
+                Open theme — pick a real problem you care about and ship a publicly deployed, usable
+                web product. Judging prioritizes usefulness, execution, clarity, and demo quality.
               </p>
               <div className="mt-6 grid sm:grid-cols-2 gap-3">
                 {[
@@ -425,10 +440,7 @@ function Problem() {
                   ["Clarity", "Easy to understand purpose and flow"],
                   ["Demo Quality", "Crisp story and live walkthrough"],
                 ].map(([k, v]) => (
-                  <div
-                    key={k}
-                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3"
-                  >
+                  <div key={k} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
                     <div className="text-sm font-semibold text-foreground">{k}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">{v}</div>
                   </div>
@@ -491,7 +503,7 @@ function Process() {
     {
       icon: FileCode2,
       title: "Register",
-      text: "Submit solo or team details via the Google Form. A team counts as one registration slot.",
+      text: "Submit solo or team details through the registration form. A team counts as one registration slot.",
       accent: "saffron",
     },
     {
@@ -528,7 +540,10 @@ function Process() {
     },
   ];
   return (
-    <section id="process" className="py-24 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent">
+    <section
+      id="process"
+      className="py-24 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent"
+    >
       <div className="mx-auto max-w-6xl">
         <SectionHeading
           eyebrow="How It Works"
@@ -544,7 +559,9 @@ function Process() {
                 className="relative rounded-2xl border border-white/10 bg-card/60 backdrop-blur p-6 hover:-translate-y-1 transition hover:border-white/20"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`size-12 rounded-xl grid place-items-center bg-white/5 ${accent}`}>
+                  <div
+                    className={`size-12 rounded-xl grid place-items-center bg-white/5 ${accent}`}
+                  >
                     <s.icon className="size-5" />
                   </div>
                   <div className="font-display text-3xl font-bold text-white/10">
@@ -571,16 +588,66 @@ function Process() {
 
 function Benefits() {
   const items = [
-    { icon: Trophy, title: "Prize Pool ₹10,000+", front: "Top teams win exciting prizes", back: "Prize money + builder opportunities for top performers across the leaderboard." },
-    { icon: Award, title: "Participation Certificate", front: "Verified digital certificate", back: "Every participant receives a signed, verifiable digital certificate of participation." },
-    { icon: Sparkles, title: "AI Workflow Recognition", front: "For smart AI-assisted builders", back: "Top builders are recognised for sharp AI-assisted planning, coding, and delivery." },
-    { icon: BookOpen, title: "Dev Resources", front: "Templates & launch kits", back: "Curated templates, checklists, and launch resources for all approved participants." },
-    { icon: Headphones, title: "Mentor Support", front: "Guidance during the sprint", back: "Get help on scope, product clarity, technical tradeoffs, and final presentation." },
-    { icon: Briefcase, title: "Opportunity Pipeline", front: "Internships & collabs", back: "Outstanding participants may be considered for internships and collaboration offers." },
-    { icon: Star, title: "Project Showcase", front: "Featured by NxtGenSec (Next Generation Security)", back: "Strong projects are hosted or featured through NxtGenSec (Next Generation Security) community channels." },
-    { icon: Trophy, title: "Winner Recognition", front: "Spotlight across community", back: "Top teams get highlighted with prize and certificate support across our network." },
-    { icon: Network, title: "Builder Network", front: "Practical, fast-moving devs", back: "Connect with a growing community of shipping-focused Indian builders." },
-    { icon: FileCode2, title: "Portfolio Proof", front: "Public repo + live demo", back: "Leave with a public repo, deployed demo, and a real story you can show beyond the event." },
+    {
+      icon: Trophy,
+      title: "Prize Pool ₹10,000+",
+      front: "Top teams win exciting prizes",
+      back: "Prize money + builder opportunities for top performers across the leaderboard.",
+    },
+    {
+      icon: Award,
+      title: "Participation Certificate",
+      front: "Verified digital certificate",
+      back: "Every participant receives a signed, verifiable digital certificate of participation.",
+    },
+    {
+      icon: Sparkles,
+      title: "AI Workflow Recognition",
+      front: "For smart AI-assisted builders",
+      back: "Top builders are recognised for sharp AI-assisted planning, coding, and delivery.",
+    },
+    {
+      icon: BookOpen,
+      title: "Dev Resources",
+      front: "Templates & launch kits",
+      back: "Curated templates, checklists, and launch resources for all approved participants.",
+    },
+    {
+      icon: Headphones,
+      title: "Mentor Support",
+      front: "Guidance during the sprint",
+      back: "Get help on scope, product clarity, technical tradeoffs, and final presentation.",
+    },
+    {
+      icon: Briefcase,
+      title: "Opportunity Pipeline",
+      front: "Internships & collabs",
+      back: "Outstanding participants may be considered for internships and collaboration offers.",
+    },
+    {
+      icon: Star,
+      title: "Project Showcase",
+      front: "Featured by NxtGenSec (Next Generation Security)",
+      back: "Strong projects are hosted or featured through NxtGenSec (Next Generation Security) community channels.",
+    },
+    {
+      icon: Trophy,
+      title: "Winner Recognition",
+      front: "Spotlight across community",
+      back: "Top teams get highlighted with prize and certificate support across our network.",
+    },
+    {
+      icon: Network,
+      title: "Builder Network",
+      front: "Practical, fast-moving devs",
+      back: "Connect with a growing community of shipping-focused Indian builders.",
+    },
+    {
+      icon: FileCode2,
+      title: "Portfolio Proof",
+      front: "Public repo + live demo",
+      back: "Leave with a public repo, deployed demo, and a real story you can show beyond the event.",
+    },
   ];
   return (
     <section id="benefits" className="py-24 px-6">
@@ -592,7 +659,9 @@ function Benefits() {
         />
 
         <div className="rounded-3xl border border-saffron/40 bg-gradient-to-br from-saffron/15 via-white/[0.02] to-india-green/15 p-8 md:p-10 mb-8 text-center shadow-[var(--shadow-saffron)]">
-          <div className="text-xs uppercase tracking-[0.3em] text-saffron">Prize Pool Highlight</div>
+          <div className="text-xs uppercase tracking-[0.3em] text-saffron">
+            Prize Pool Highlight
+          </div>
           <div className="font-display text-5xl md:text-6xl font-bold mt-3 tricolor-text">
             ₹10,000+
           </div>
@@ -650,7 +719,9 @@ function Collaborators() {
                 key={`${c.name}-${index}`}
                 className="grid w-[170px] shrink-0 place-items-center gap-3 rounded-xl border border-white/10 bg-card/70 px-4 py-5 text-center shadow-[var(--shadow-elevate)] backdrop-blur transition hover:-translate-y-1 hover:border-saffron/40 sm:w-[200px]"
               >
-                <div className={`grid size-16 place-items-center rounded-2xl bg-gradient-to-br ${c.tone} text-lg font-bold text-foreground ring-1 ring-white/10 sm:size-20 sm:text-xl`}>
+                <div
+                  className={`grid size-16 place-items-center rounded-2xl bg-gradient-to-br ${c.tone} text-lg font-bold text-foreground ring-1 ring-white/10 sm:size-20 sm:text-xl`}
+                >
                   {c.logo}
                 </div>
                 <div className="min-h-10 text-sm font-semibold leading-tight sm:text-base">
@@ -667,11 +738,46 @@ function Collaborators() {
 
 function PastHackathonsShowcase() {
   const editions = [
-    { name: "January 2026", mode: "Individual Participation", winner: "TV Geethika", runner: "B. Manoj Kumar", poster: janPoster, note: "The opening edition focused on individual builders proving product clarity, speed, and working demos." },
-    { name: "February 2026", mode: "Team Based", winner: "GenZ", runner: "TechNova", poster: febPoster, note: "Teams collaborated on practical web ideas with stronger execution and presentation quality." },
-    { name: "March 2026", mode: "Online Hackathon", winner: "Dynamic Duo", runner: "Code Queens", poster: marPoster, note: "The online edition expanded reach and brought in fast-moving builders from different cities." },
-    { name: "April 2026", mode: "Team Based - VibeCoding 4.0", winner: "Team Tech Titans", runner: "Cyber Techie", poster: aprPoster, note: "VibeCoding 4.0 pushed teams toward sharper problem framing and public project demos." },
-    { name: "May 2026", mode: "Online - VibeCoding 5.0", winner: "Rockers", runner: "Unstoppable", poster: mayPoster, note: "The fifth edition strengthened the monthly builder community and celebrated consistent shipping." },
+    {
+      name: "January 2026",
+      mode: "Individual Participation",
+      winner: "TV Geethika",
+      runner: "B. Manoj Kumar",
+      poster: janPoster,
+      note: "The opening edition focused on individual builders proving product clarity, speed, and working demos.",
+    },
+    {
+      name: "February 2026",
+      mode: "Team Based",
+      winner: "GenZ",
+      runner: "TechNova",
+      poster: febPoster,
+      note: "Teams collaborated on practical web ideas with stronger execution and presentation quality.",
+    },
+    {
+      name: "March 2026",
+      mode: "Online Hackathon",
+      winner: "Dynamic Duo",
+      runner: "Code Queens",
+      poster: marPoster,
+      note: "The online edition expanded reach and brought in fast-moving builders from different cities.",
+    },
+    {
+      name: "April 2026",
+      mode: "Team Based - VibeCoding 4.0",
+      winner: "Team Tech Titans",
+      runner: "Cyber Techie",
+      poster: aprPoster,
+      note: "VibeCoding 4.0 pushed teams toward sharper problem framing and public project demos.",
+    },
+    {
+      name: "May 2026",
+      mode: "Online - VibeCoding 5.0",
+      winner: "Rockers",
+      runner: "Unstoppable",
+      poster: mayPoster,
+      note: "The fifth edition strengthened the monthly builder community and celebrated consistent shipping.",
+    },
   ];
   const [activeIndex, setActiveIndex] = useState(0);
   const active = editions[activeIndex];
@@ -685,7 +791,10 @@ function PastHackathonsShowcase() {
   }, [editions.length]);
 
   return (
-    <section id="past" className="py-20 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent">
+    <section
+      id="past"
+      className="py-20 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent"
+    >
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow="Hall of Fame"
@@ -716,7 +825,7 @@ function PastHackathonsShowcase() {
                 </div>
               ))}
             </div>
-            <div className="mt-4 flex justify-center gap-2">
+            <div className="mt-2 flex justify-center gap-2">
               {editions.map((e, index) => (
                 <button
                   key={e.name}
@@ -739,15 +848,11 @@ function PastHackathonsShowcase() {
               <div className="text-[10px] uppercase tracking-[0.24em] text-saffron">
                 Active Edition
               </div>
-              <h3 className="mt-2 font-display text-2xl font-bold md:text-3xl">
-                {active.name}
-              </h3>
+              <h3 className="mt-2 font-display text-2xl font-bold md:text-3xl">{active.name}</h3>
               <div className="mt-2 inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                 {active.mode}
               </div>
-              <p className="mt-4 text-sm leading-6 text-muted-foreground">
-                {active.note}
-              </p>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">{active.note}</p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 <div className="rounded-xl border border-saffron/30 bg-saffron/10 p-3">
@@ -755,14 +860,18 @@ function PastHackathonsShowcase() {
                     <Trophy className="size-4 text-saffron" />
                     Winner
                   </div>
-                  <div className="mt-2 font-display text-lg font-semibold leading-tight">{active.winner}</div>
+                  <div className="mt-2 font-display text-lg font-semibold leading-tight">
+                    {active.winner}
+                  </div>
                 </div>
                 <div className="rounded-xl border border-india-green/30 bg-india-green/10 p-3">
                   <div className="flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-muted-foreground">
                     <Award className="size-4 text-india-green" />
                     Runner Up
                   </div>
-                  <div className="mt-2 font-display text-lg font-semibold leading-tight">{active.runner}</div>
+                  <div className="mt-2 font-display text-lg font-semibold leading-tight">
+                    {active.runner}
+                  </div>
                 </div>
               </div>
 
@@ -790,14 +899,47 @@ function PastHackathonsShowcase() {
 
 function PastHackathons() {
   const editions = [
-    { name: "January 2026 Poster", mode: "Mode: Individual Participation", winner: "TV Geethika", runner: "B. Manoj Kumar", poster: janPoster },
-    { name: "February 2026 Poster", mode: "Mode: Team Based", winner: "GenZ", runner: "TechNova", poster: febPoster },
-    { name: "March 2026 Poster", mode: "Mode: Online Hackathon", winner: "Dynamic Duo", runner: "Code Queens", poster: marPoster },
-    { name: "April 2026 Poster", mode: "Mode: Team Based - VibeCoding 4.0", winner: "Team Tech Titans", runner: "Cyber Techie", poster: aprPoster },
-    { name: "May 2026 Poster", mode: "Mode: Online - VibeCoding 5.0", winner: "Rockers", runner: "Unstoppable", poster: mayPoster },
+    {
+      name: "January 2026 Poster",
+      mode: "Mode: Individual Participation",
+      winner: "TV Geethika",
+      runner: "B. Manoj Kumar",
+      poster: janPoster,
+    },
+    {
+      name: "February 2026 Poster",
+      mode: "Mode: Team Based",
+      winner: "GenZ",
+      runner: "TechNova",
+      poster: febPoster,
+    },
+    {
+      name: "March 2026 Poster",
+      mode: "Mode: Online Hackathon",
+      winner: "Dynamic Duo",
+      runner: "Code Queens",
+      poster: marPoster,
+    },
+    {
+      name: "April 2026 Poster",
+      mode: "Mode: Team Based - VibeCoding 4.0",
+      winner: "Team Tech Titans",
+      runner: "Cyber Techie",
+      poster: aprPoster,
+    },
+    {
+      name: "May 2026 Poster",
+      mode: "Mode: Online - VibeCoding 5.0",
+      winner: "Rockers",
+      runner: "Unstoppable",
+      poster: mayPoster,
+    },
   ];
   return (
-    <section id="past" className="py-20 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent">
+    <section
+      id="past"
+      className="py-20 px-6 bg-gradient-to-b from-transparent via-ink-2/30 to-transparent"
+    >
       <div className="mx-auto max-w-7xl">
         <SectionHeading
           eyebrow="Hall of Fame"
@@ -904,16 +1046,46 @@ function PastHackathons() {
 
 function Faq() {
   const faqs = [
-    ["Is there a registration fee to participate?", "No. The July edition is completely free for all accepted participants. There is no registration fee."],
-    ["Can I participate as an individual?", "Yes. You can register solo or join with a team of up to 4 — a team counts as one registration slot."],
-    ["What is the team size limit?", "Up to 4 members per team. Keep the team lean and shipping-focused."],
-    ["What is the problem statement?", "The official problem statement is announced by NxtGenSec (Next Generation Security) at kickoff on July 25, 10:00 AM IST. The hackathon is open-theme - pick a real problem and ship a public web product."],
-    ["When does the hackathon start and end?", "Hackathon days are July 25, 26, and 27, 2026. Final project submission is due on July 27 at 11:49 PM IST."],
-    ["What should the final submission include?", "A publicly deployed, usable web product + public repository + short demo. Judging prioritises usefulness, execution, clarity, and demo quality."],
-    ["Will there be technical support during the hackathon?", "Yes. Approved participants are added to a dedicated WhatsApp group for kickoff, mentor support, and final evaluation."],
-    ["What prizes will be awarded?", "A prize pool of ₹10,000+, participation certificates, project showcase, and opportunities for internships and collaborations."],
-    ["Is the hackathon online or in-person?", "Fully online. Open to participants from anywhere in India and beyond."],
-    ["How will the prize money be distributed?", "Prize distribution is announced after the evaluation period. Details are shared in the WhatsApp group and via official channels."],
+    [
+      "Is there a registration fee to participate?",
+      "No. The July edition is completely free for all accepted participants. There is no registration fee.",
+    ],
+    [
+      "Can I participate as an individual?",
+      "Yes. You can register solo or join with a team of up to 4 — a team counts as one registration slot.",
+    ],
+    [
+      "What is the team size limit?",
+      "Up to 4 members per team. Keep the team lean and shipping-focused.",
+    ],
+    [
+      "What is the problem statement?",
+      "The official problem statement is announced by NxtGenSec (Next Generation Security) at kickoff on July 25, 10:00 AM IST. The hackathon is open-theme - pick a real problem and ship a public web product.",
+    ],
+    [
+      "When does the hackathon start and end?",
+      "Hackathon days are July 25, 26, and 27, 2026. Final project submission is due on July 27 at 11:49 PM IST.",
+    ],
+    [
+      "What should the final submission include?",
+      "A publicly deployed, usable web product + public repository + short demo. Judging prioritises usefulness, execution, clarity, and demo quality.",
+    ],
+    [
+      "Will there be technical support during the hackathon?",
+      "Yes. Approved participants are added to a dedicated WhatsApp group for kickoff, mentor support, and final evaluation.",
+    ],
+    [
+      "What prizes will be awarded?",
+      "A prize pool of ₹10,000+, participation certificates, project showcase, and opportunities for internships and collaborations.",
+    ],
+    [
+      "Is the hackathon online or in-person?",
+      "Fully online. Open to participants from anywhere in India and beyond.",
+    ],
+    [
+      "How will the prize money be distributed?",
+      "Prize distribution is announced after the evaluation period. Details are shared in the WhatsApp group and via official channels.",
+    ],
   ];
   return (
     <section id="faq" className="py-24 px-6">
@@ -934,9 +1106,7 @@ function Faq() {
                   <span className="font-medium">{q}</span>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground pl-10">
-                {a}
-              </AccordionContent>
+              <AccordionContent className="text-muted-foreground pl-10">{a}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
@@ -954,22 +1124,20 @@ function FinalCta() {
           <AshokaChakra className="text-chakra chakra-spin" size={384} />
         </div>
         <h2 className="font-display text-3xl md:text-5xl font-bold">
-          Ready to build with the{" "}
-          <span className="tricolor-text">VibeCoding</span> community?
+          Ready to build with the <span className="tricolor-text">VibeCoding</span> community?
         </h2>
         <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-          Registration is free. Repost the official announcement on LinkedIn, get verified, and
-          join the dedicated WhatsApp group for the final evaluation.
+          Registration is free. Repost the official announcement on LinkedIn, get verified, and join
+          the dedicated WhatsApp group for the final evaluation.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <a
-            href={GOOGLE_FORM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={openRegistrationDialog}
             className="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground hover:brightness-110 transition shadow-[var(--shadow-saffron)]"
           >
-            Register on Google Form <ExternalLink className="size-4" />
-          </a>
+            Register Now <UserPlus className="size-4" />
+          </button>
           <a
             href={LINKEDIN_POST_URL}
             target="_blank"
@@ -980,9 +1148,16 @@ function FinalCta() {
           </a>
         </div>
         <div className="mt-8 flex flex-wrap justify-center gap-6 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-india-green" /> Free registration</span>
-          <span className="flex items-center gap-1.5"><Linkedin className="size-3.5 text-saffron" /> LinkedIn repost required</span>
-          <span className="flex items-center gap-1.5"><MessageCircle className="size-3.5 text-india-green" /> WhatsApp group after verification</span>
+          <span className="flex items-center gap-1.5">
+            <CheckCircle2 className="size-3.5 text-india-green" /> Free registration
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Linkedin className="size-3.5 text-saffron" /> LinkedIn repost required
+          </span>
+          <span className="flex items-center gap-1.5">
+            <MessageCircle className="size-3.5 text-india-green" /> WhatsApp group after
+            verification
+          </span>
         </div>
       </div>
     </section>
@@ -1006,8 +1181,8 @@ function Footer() {
             <div className="font-display font-bold">NxtGenSec (Next Generation Security)</div>
           </div>
           <p className="mt-4 text-sm text-muted-foreground max-w-xs">
-            NxtGenSec (Next Generation Security) runs focused monthly hackathons where Indian builders solve practical
-            problems and ship production-ready ideas.
+            NxtGenSec (Next Generation Security) runs focused monthly hackathons where Indian
+            builders solve practical problems and ship production-ready ideas.
           </p>
         </div>
         <div>
