@@ -541,8 +541,44 @@ function AdminPage() {
     } else {
       toast.success(`Marked as ${status}.`);
       await loadRegistrations();
+
+      // Sync approved registrations to Google Sheets
+      if (status === "approved") {
+        syncToSheets(id);
+      }
     }
     setActionId(null);
+  }
+
+  async function syncToSheets(registrationId: string) {
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+      const functionUrl = `${supabaseUrl}/functions/v1/sync-to-sheets`;
+
+      const session = await supabase!.auth.getSession();
+      const token = session.data.session?.access_token ?? supabaseAnonKey;
+
+      const res = await fetch(functionUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          apikey: supabaseAnonKey,
+        },
+        body: JSON.stringify({ registration_id: registrationId }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.warn("[sync-to-sheets] failed:", err);
+        toast.warning("Approved, but Google Sheets sync failed. Check console.");
+      } else {
+        toast.success("Data synced to Google Sheets.");
+      }
+    } catch (err) {
+      console.warn("[sync-to-sheets] error:", err);
+    }
   }
 
   function openEditor(registration: RegistrationRow) {
@@ -718,6 +754,11 @@ function AdminPage() {
       toast.success("Registration updated.");
       setEditing(null);
       await loadRegistrations();
+
+      // Sync to Google Sheets when status is approved
+      if (editing.status === "approved") {
+        syncToSheets(editing.id);
+      }
     }
     setSaving(false);
   }
