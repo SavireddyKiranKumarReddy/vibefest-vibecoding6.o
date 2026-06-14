@@ -707,11 +707,7 @@ function Collaborators() {
   return (
     <section id="collaborators" className="py-20 px-6">
       <div className="mx-auto max-w-7xl">
-        <SectionHeading
-          eyebrow="Network"
-          title="Collaborators"
-          sub="Demo collaborator entries are shown for now. Replace the logo and name data when final collaborators are confirmed."
-        />
+        <SectionHeading eyebrow="Network" title="Collaborators" />
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink/35 p-3 shadow-[var(--shadow-elevate)]">
           <div className="marquee-collaborators-ltr flex w-max items-stretch gap-4">
             {[...collaborators, ...collaborators].map((c, index) => (

@@ -693,7 +693,27 @@ function AdminPage() {
     });
 
     if (error) {
-      toast.error(error.message);
+      const details = [error.message, error.details, error.hint, error.code]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      if (details.includes("team name") || details.includes("registrations_team_name_unique")) {
+        const alertMessage =
+          "This team name already exists in the database. Please use a different team name.";
+        window.alert(alertMessage);
+        toast.error(alertMessage);
+      } else if (
+        details.includes("email") ||
+        details.includes("registration_members_email_unique")
+      ) {
+        const alertMessage =
+          "One of these participant emails already exists in the database. Please use different participant details.";
+        window.alert(alertMessage);
+        toast.error(alertMessage);
+      } else {
+        toast.error(error.message);
+      }
     } else {
       toast.success("Registration updated.");
       setEditing(null);
