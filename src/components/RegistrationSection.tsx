@@ -577,7 +577,7 @@ export function RegistrationDialog() {
       }
 
       setSuccessMessage(
-        "Thank you! We have received your details. Once we verify everything, we will add you to the official WhatsApp group.",
+        "Be ready to vibe with your vibecoding skills! Once we verify everything, we will add you to the official WhatsApp group.",
       );
       toast.success("Registration submitted successfully!");
     } finally {
