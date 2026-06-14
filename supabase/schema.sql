@@ -228,6 +228,47 @@ begin
 end;
 $$;
 
+create or replace function public.check_registration_availability(
+  team_name_input text default null,
+  emails_input text[] default array[]::text[]
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_team_name text := nullif(btrim(team_name_input), '');
+  v_team_exists boolean := false;
+  v_existing_emails text[] := array[]::text[];
+begin
+  if v_team_name is not null then
+    select exists (
+      select 1
+      from public.registrations
+      where lower(team_name) = lower(v_team_name)
+    )
+    into v_team_exists;
+  end if;
+
+  if coalesce(array_length(emails_input, 1), 0) > 0 then
+    select coalesce(array_agg(email order by email), array[]::text[])
+      into v_existing_emails
+    from public.registration_members
+    where lower(email) in (
+      select lower(nullif(btrim(email), ''))
+      from unnest(emails_input) as email
+      where nullif(btrim(email), '') is not null
+    );
+  end if;
+
+  return jsonb_build_object(
+    'team_exists', v_team_exists,
+    'existing_emails', to_jsonb(v_existing_emails)
+  );
+end;
+$$;
+
 create or replace function public.admin_update_registration(payload jsonb)
 returns uuid
 language plpgsql
@@ -384,6 +425,7 @@ end;
 $$;
 
 grant execute on function public.submit_registration(jsonb) to anon, authenticated;
+grant execute on function public.check_registration_availability(text, text[]) to anon, authenticated;
 grant execute on function public.admin_update_registration(jsonb) to authenticated;
 grant execute on function public.admin_delete_registration(uuid) to authenticated;
 grant select on public.admin_users to authenticated;

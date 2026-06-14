@@ -41,6 +41,11 @@ import { cn } from "@/lib/utils";
 type RegistrationStep = 1 | 2 | 3 | 4;
 export const REGISTRATION_DIALOG_EVENT = "vibecoding:open-registration";
 
+type AvailabilityResult = {
+  team_exists?: boolean;
+  existing_emails?: string[];
+};
+
 export function openRegistrationDialog() {
   window.dispatchEvent(new Event(REGISTRATION_DIALOG_EVENT));
 }
@@ -75,6 +80,7 @@ export function RegistrationDialog() {
   const [lead, setLead] = useState(emptyLead);
   const [members, setMembers] = useState<ParticipantInput[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
@@ -166,7 +172,49 @@ export function RegistrationDialog() {
     }
   }
 
-  function nextStep() {
+  async function checkRegistrationAvailability(team: string, emails: string[] = []) {
+    if (!supabase || !isSupabaseConfigured) {
+      return true;
+    }
+
+    setCheckingAvailability(true);
+    try {
+      const { data, error } = await supabase.rpc("check_registration_availability", {
+        team_name_input: team,
+        emails_input: emails,
+      });
+
+      if (error) {
+        toast.error("Could not check existing registrations. Please try again.");
+        return false;
+      }
+
+      const result = (data ?? {}) as AvailabilityResult;
+
+      if (result.team_exists) {
+        const alertMessage =
+          "This team name already exists in the database. Please choose another team name.";
+        window.alert(alertMessage);
+        toast.error(alertMessage);
+        setStep(2);
+        return false;
+      }
+
+      if (result.existing_emails?.length) {
+        const alertMessage =
+          "One or more participant emails already exist in the database. Please use different email addresses.";
+        window.alert(alertMessage);
+        toast.error(alertMessage);
+        return false;
+      }
+
+      return true;
+    } finally {
+      setCheckingAvailability(false);
+    }
+  }
+
+  async function nextStep() {
     if (!canGoNext) {
       if (step === 2) {
         toast.error("Select team size and enter a team name.");
@@ -175,9 +223,18 @@ export function RegistrationDialog() {
       } else {
         toast.error("Choose an option to continue.");
       }
-      return;
+      return false;
     }
+
+    if (step === 2) {
+      const available = await checkRegistrationAvailability(teamName.trim());
+      if (!available) {
+        return false;
+      }
+    }
+
     setStep((current) => Math.min(4, current + 1) as RegistrationStep);
+    return true;
   }
 
   function previousStep() {
@@ -200,7 +257,7 @@ export function RegistrationDialog() {
     event.preventDefault();
 
     if (step !== 4) {
-      nextStep();
+      await nextStep();
       return;
     }
 
@@ -264,6 +321,11 @@ export function RegistrationDialog() {
     const emails = payloadMembers.map((member) => member.email);
     if (new Set(emails).size !== emails.length) {
       toast.error("Each participant email must be unique.");
+      return;
+    }
+
+    const available = await checkRegistrationAvailability(team, emails);
+    if (!available) {
       return;
     }
 
@@ -614,7 +676,7 @@ export function RegistrationDialog() {
                 type="button"
                 variant="outline"
                 onClick={previousStep}
-                disabled={step === 1 || submitting}
+                disabled={step === 1 || submitting || checkingAvailability}
                 className="gap-2"
               >
                 <ArrowLeft className="size-4" />
@@ -622,17 +684,21 @@ export function RegistrationDialog() {
               </Button>
               <Button
                 type="submit"
-                disabled={submitting || (step !== 4 && !canGoNext)}
+                disabled={submitting || checkingAvailability || (step !== 4 && !canGoNext)}
                 className="gap-2"
               >
-                {submitting ? (
+                {submitting || checkingAvailability ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : step === 4 ? (
                   <BadgeCheck className="size-4" />
                 ) : (
                   <ArrowRight className="size-4" />
                 )}
-                {step === 4 ? "Submit registration" : "Continue"}
+                {checkingAvailability
+                  ? "Checking"
+                  : step === 4
+                    ? "Submit registration"
+                    : "Continue"}
               </Button>
             </div>
           </form>
