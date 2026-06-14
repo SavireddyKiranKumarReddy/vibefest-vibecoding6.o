@@ -9,11 +9,15 @@ import {
   Link2,
   Loader2,
   Mail,
-  MessageCircleMore,
   Phone,
   Sparkles,
   UserRound,
   Users,
+  Check,
+  X,
+  Info,
+  ShieldAlert,
+  Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,7 +42,7 @@ import {
 } from "@/lib/registration";
 import { cn } from "@/lib/utils";
 
-type RegistrationStep = 1 | 2 | 3 | 4;
+type RegistrationStep = 1 | 2 | 3;
 export const REGISTRATION_DIALOG_EVENT = "vibecoding:open-registration";
 
 type AvailabilityResult = {
@@ -51,10 +55,10 @@ export function openRegistrationDialog() {
 }
 
 const teamOptions: Array<{ label: string; size: TeamSize; title: string; description: string }> = [
-  { label: "1", size: "solo", title: "Solo", description: "Only team lead" },
-  { label: "2", size: "duo", title: "Duo", description: "Lead + 1 member" },
-  { label: "3", size: "trio", title: "Trio", description: "Lead + 2 members" },
-  { label: "4", size: "squad", title: "Squad", description: "Lead + 3 members" },
+  { label: "1", size: "solo", title: "Solo", description: "Lead only" },
+  { label: "2", size: "duo", title: "Duo", description: "Lead + 1" },
+  { label: "3", size: "trio", title: "Trio", description: "Lead + 2" },
+  { label: "4", size: "squad", title: "Squad", description: "Lead + 3" },
 ];
 
 const emptyParticipant = (): ParticipantInput => ({
@@ -71,6 +75,30 @@ const emptyLead = () => ({
   phone: "",
 });
 
+const isEmailSyntaxValid = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+const isUrlSyntaxValid = (url: string) => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname.includes("linkedin.com");
+  } catch {
+    return false;
+  }
+};
+
+const isRepostUrlSyntaxValid = (url: string) => {
+  if (!url) return false;
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export function RegistrationDialog() {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<RegistrationStep>(1);
@@ -82,6 +110,20 @@ export function RegistrationDialog() {
   const [submitting, setSubmitting] = useState(false);
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Validation & User Experience States
+  const [teamNameStatus, setTeamNameStatus] = useState<
+    "idle" | "checking" | "available" | "taken" | "invalid"
+  >("idle");
+  const [leadEmailStatus, setLeadEmailStatus] = useState<
+    "idle" | "checking" | "available" | "taken" | "invalid"
+  >("idle");
+  const [memberEmailStatuses, setMemberEmailStatuses] = useState<
+    Record<number, "idle" | "checking" | "available" | "taken" | "invalid">
+  >({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [activeMemberTab, setActiveMemberTab] = useState(0);
+  const [confirmedReview, setConfirmedReview] = useState(false);
 
   useEffect(() => {
     const openDialog = () => setOpen(true);
@@ -109,7 +151,7 @@ export function RegistrationDialog() {
           `${window.location.pathname}${window.location.search}`,
         );
       }
-    }, 3000);
+    }, 4000);
 
     return () => window.clearTimeout(closeTimer);
   }, [open, successMessage]);
@@ -123,32 +165,70 @@ export function RegistrationDialog() {
     setMembers((current) =>
       Array.from({ length: memberSlots }, (_, index) => current[index] ?? emptyParticipant()),
     );
+    setActiveMemberTab(0);
+    setMemberEmailStatuses({});
+    setTouchedFields({});
   }, [memberSlots]);
 
-  const currentStepTitle = [
-    "Choose participant type",
-    "Choose team size",
-    "Team lead details",
-    memberSlots > 0 ? "Team member details" : "Submit registration",
-  ][step - 1];
+  const markTouched = (field: string) => {
+    setTouchedFields((prev) => ({ ...prev, [field]: true }));
+  };
 
-  const canGoNext =
-    (step === 1 && Boolean(participantType)) ||
-    (step === 2 && Boolean(teamSize) && Boolean(teamName.trim())) ||
-    (step === 3 && hasLeadBasics()) ||
-    step === 4;
+  const isMemberTabComplete = (idx: number) => {
+    const m = members[idx];
+    return (
+      m &&
+      m.fullName.trim().length > 0 &&
+      m.email.trim().length > 0 &&
+      memberEmailStatuses[idx] === "available" &&
+      isUrlSyntaxValid(m.linkedinUrl) &&
+      isRepostUrlSyntaxValid(m.repostUrl)
+    );
+  };
 
-  function hasLeadBasics() {
+  const hasLeadBasics = () => {
     return Boolean(
       lead.fullName.trim() &&
       lead.email.trim() &&
       lead.phone.trim() &&
-      lead.linkedinUrl.trim() &&
-      lead.repostUrl.trim() &&
+      isUrlSyntaxValid(lead.linkedinUrl) &&
+      isRepostUrlSyntaxValid(lead.repostUrl) &&
       lead.affiliation?.trim() &&
       lead.note?.trim(),
     );
-  }
+  };
+
+  const canGoNext = useMemo(() => {
+    if (step === 1) {
+      return (
+        Boolean(participantType) &&
+        Boolean(teamSize) &&
+        teamName.trim().length >= 3 &&
+        teamNameStatus === "available"
+      );
+    }
+    if (step === 2) {
+      return hasLeadBasics() && leadEmailStatus === "available";
+    }
+    if (step === 3) {
+      const crewValid =
+        teamSize === "solo" ||
+        (members.length > 0 && members.every((_, idx) => isMemberTabComplete(idx)));
+      return crewValid && confirmedReview;
+    }
+    return false;
+  }, [
+    step,
+    participantType,
+    teamSize,
+    teamName,
+    teamNameStatus,
+    lead,
+    leadEmailStatus,
+    members,
+    memberEmailStatuses,
+    confirmedReview,
+  ]);
 
   function resetForm() {
     setStep(1);
@@ -157,6 +237,11 @@ export function RegistrationDialog() {
     setTeamName("");
     setLead(emptyLead());
     setMembers([]);
+    setTeamNameStatus("idle");
+    setLeadEmailStatus("idle");
+    setMemberEmailStatuses({});
+    setTouchedFields({});
+    setConfirmedReview(false);
   }
 
   function handleOpenChange(nextOpen: boolean) {
@@ -172,7 +257,103 @@ export function RegistrationDialog() {
     }
   }
 
-  async function checkRegistrationAvailability(team: string, emails: string[] = []) {
+  // Database checks
+  const checkTeamNameDb = async (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed || trimmed.length < 3) {
+      setTeamNameStatus("invalid");
+      return;
+    }
+    if (!supabase || !isSupabaseConfigured) {
+      setTeamNameStatus("available");
+      return;
+    }
+    setTeamNameStatus("checking");
+    try {
+      const { data, error } = await supabase.rpc("check_registration_availability", {
+        team_name_input: trimmed,
+        emails_input: [],
+      });
+      if (error) {
+        setTeamNameStatus("idle");
+        return;
+      }
+      const result = data as AvailabilityResult;
+      setTeamNameStatus(result.team_exists ? "taken" : "available");
+    } catch {
+      setTeamNameStatus("idle");
+    }
+  };
+
+  const checkLeadEmailDb = async (email: string) => {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed || !isEmailSyntaxValid(trimmed)) {
+      setLeadEmailStatus("invalid");
+      return;
+    }
+    if (!supabase || !isSupabaseConfigured) {
+      setLeadEmailStatus("available");
+      return;
+    }
+    setLeadEmailStatus("checking");
+    try {
+      const { data, error } = await supabase.rpc("check_registration_availability", {
+        team_name_input: null,
+        emails_input: [trimmed],
+      });
+      if (error) {
+        setLeadEmailStatus("idle");
+        return;
+      }
+      const result = data as AvailabilityResult;
+      const taken = result.existing_emails?.includes(trimmed);
+      setLeadEmailStatus(taken ? "taken" : "available");
+    } catch {
+      setLeadEmailStatus("idle");
+    }
+  };
+
+  const checkMemberEmailDb = async (index: number, email: string) => {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed || !isEmailSyntaxValid(trimmed)) {
+      setMemberEmailStatuses((prev) => ({ ...prev, [index]: "invalid" }));
+      return;
+    }
+    // Check local duplicates
+    const isDuplicateLocal =
+      trimmed === lead.email.trim().toLowerCase() ||
+      members.some((m, idx) => idx !== index && m.email.trim().toLowerCase() === trimmed);
+
+    if (isDuplicateLocal) {
+      setMemberEmailStatuses((prev) => ({ ...prev, [index]: "invalid" }));
+      toast.error("Duplicate emails detected in the team.");
+      return;
+    }
+
+    if (!supabase || !isSupabaseConfigured) {
+      setMemberEmailStatuses((prev) => ({ ...prev, [index]: "available" }));
+      return;
+    }
+
+    setMemberEmailStatuses((prev) => ({ ...prev, [index]: "checking" }));
+    try {
+      const { data, error } = await supabase.rpc("check_registration_availability", {
+        team_name_input: null,
+        emails_input: [trimmed],
+      });
+      if (error) {
+        setMemberEmailStatuses((prev) => ({ ...prev, [index]: "idle" }));
+        return;
+      }
+      const result = data as AvailabilityResult;
+      const taken = result.existing_emails?.includes(trimmed);
+      setMemberEmailStatuses((prev) => ({ ...prev, [index]: taken ? "taken" : "available" }));
+    } catch {
+      setMemberEmailStatuses((prev) => ({ ...prev, [index]: "idle" }));
+    }
+  };
+
+  async function checkRegistrationAvailability(team: string | null, emails: string[] = []) {
     if (!supabase || !isSupabaseConfigured) {
       return true;
     }
@@ -191,20 +372,13 @@ export function RegistrationDialog() {
 
       const result = (data ?? {}) as AvailabilityResult;
 
-      if (result.team_exists) {
-        const alertMessage =
-          "This team name already exists in the database. Please choose another team name.";
-        window.alert(alertMessage);
-        toast.error(alertMessage);
-        setStep(2);
+      if (team && result.team_exists) {
+        toast.error("This team name is already taken.");
         return false;
       }
 
-      if (result.existing_emails?.length) {
-        const alertMessage =
-          "One or more participant emails already exist in the database. Please use different email addresses.";
-        window.alert(alertMessage);
-        toast.error(alertMessage);
+      if (emails.length > 0 && result.existing_emails?.length) {
+        toast.error(`Registered emails detected: ${result.existing_emails.join(", ")}`);
         return false;
       }
 
@@ -214,27 +388,89 @@ export function RegistrationDialog() {
     }
   }
 
+  const markStep1Touched = () => {
+    setTouchedFields((prev) => ({
+      ...prev,
+      teamName: true,
+      participantType: true,
+      teamSize: true,
+    }));
+  };
+
+  const markStep2Touched = () => {
+    setTouchedFields((prev) => ({
+      ...prev,
+      leadName: true,
+      leadEmail: true,
+      leadPhone: true,
+      leadAffiliation: true,
+      leadLinkedin: true,
+      leadRepost: true,
+      leadNote: true,
+    }));
+  };
+
+  const markStep3Touched = () => {
+    members.forEach((_, idx) => {
+      setTouchedFields((prev) => ({
+        ...prev,
+        [`member_${idx}_name`]: true,
+        [`member_${idx}_email`]: true,
+        [`member_${idx}_linkedin`]: true,
+        [`member_${idx}_repost`]: true,
+      }));
+    });
+  };
+
   async function nextStep() {
-    if (!canGoNext) {
-      if (step === 2) {
-        toast.error("Select team size and enter a team name.");
-      } else if (step === 3) {
-        toast.error("Complete all required lead details.");
-      } else {
-        toast.error("Choose an option to continue.");
+    if (step === 1) {
+      markStep1Touched();
+      if (!participantType || !teamSize || !teamName.trim()) {
+        toast.error("Please fill profile and team name.");
+        return false;
       }
-      return false;
+      if (teamName.trim().length < 3) {
+        toast.error("Team name must be at least 3 characters.");
+        return false;
+      }
+      const available = await checkRegistrationAvailability(teamName.trim());
+      if (!available) {
+        setTeamNameStatus("taken");
+        return false;
+      }
+      setTeamNameStatus("available");
+      setStep(2);
+      return true;
     }
 
     if (step === 2) {
-      const available = await checkRegistrationAvailability(teamName.trim());
-      if (!available) {
+      markStep2Touched();
+      if (!hasLeadBasics()) {
+        toast.error("Complete all required team lead details.");
         return false;
       }
+      if (!isEmailSyntaxValid(lead.email)) {
+        toast.error("Please enter a valid email address.");
+        return false;
+      }
+      if (!isUrlSyntaxValid(lead.linkedinUrl)) {
+        toast.error("Please enter a valid LinkedIn URL.");
+        return false;
+      }
+
+      const available = await checkRegistrationAvailability(null, [
+        lead.email.trim().toLowerCase(),
+      ]);
+      if (!available) {
+        setLeadEmailStatus("taken");
+        return false;
+      }
+      setLeadEmailStatus("available");
+      setStep(3);
+      return true;
     }
 
-    setStep((current) => Math.min(4, current + 1) as RegistrationStep);
-    return true;
+    return false;
   }
 
   function previousStep() {
@@ -243,6 +479,9 @@ export function RegistrationDialog() {
 
   const updateLead = (field: keyof typeof lead, value: string) => {
     setLead((current) => ({ ...current, [field]: value }));
+    if (field === "email") {
+      setLeadEmailStatus("idle");
+    }
   };
 
   const updateMember = (index: number, field: keyof ParticipantInput, value: string) => {
@@ -251,41 +490,32 @@ export function RegistrationDialog() {
         memberIndex === index ? { ...member, [field]: value } : member,
       ),
     );
+    if (field === "email") {
+      setMemberEmailStatuses((prev) => ({ ...prev, [index]: "idle" }));
+    }
   };
 
   const submitRegistration = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (step !== 4) {
+    if (step !== 3) {
       await nextStep();
       return;
     }
 
+    markStep3Touched();
     if (!supabase || !isSupabaseConfigured) {
       toast.error("Supabase is not connected yet.");
       return;
     }
 
-    if (!participantType || !teamSize) {
-      toast.error("Choose participant type and team size.");
-      setStep(!participantType ? 1 : 2);
+    if (!confirmedReview) {
+      toast.error("Please confirm details and check the agreement box.");
       return;
     }
 
     const team = teamName.trim();
-    if (!team) {
-      toast.error("Add a team name first.");
-      setStep(2);
-      return;
-    }
-
     const normalizedLeadEmail = lead.email.trim().toLowerCase();
-    if (!hasLeadBasics()) {
-      toast.error("Complete all required lead details.");
-      setStep(3);
-      return;
-    }
-
     const payloadMembers = [
       {
         role: "lead" as const,
@@ -309,30 +539,10 @@ export function RegistrationDialog() {
       })),
     ];
 
-    const hasEmptyMember = payloadMembers.some(
-      (member) => !member.fullName || !member.email || !member.linkedinUrl || !member.repostUrl,
-    );
-    if (hasEmptyMember) {
-      toast.error("Every participant must have name, email, LinkedIn, and repost link.");
-      setStep(4);
-      return;
-    }
-
-    const emails = payloadMembers.map((member) => member.email);
-    if (new Set(emails).size !== emails.length) {
-      toast.error("Each participant email must be unique.");
-      return;
-    }
-
-    const available = await checkRegistrationAvailability(team, emails);
-    if (!available) {
-      return;
-    }
-
     const payload: TeamRegistrationPayload = {
       team_name: team,
-      team_size: teamSize,
-      participant_type: participantType,
+      team_size: teamSize as TeamSize,
+      participant_type: participantType as ParticipantType,
       lead_name: lead.fullName.trim(),
       lead_email: normalizedLeadEmail,
       lead_phone: lead.phone.trim(),
@@ -353,19 +563,13 @@ export function RegistrationDialog() {
           .toLowerCase();
 
         if (details.includes("team name") || details.includes("registrations_team_name_unique")) {
-          const alertMessage =
-            "This team name is already registered. Please use a different team name.";
-          window.alert(alertMessage);
-          toast.error(alertMessage);
-          setStep(2);
+          toast.error("This team name is already registered. Please choose another.");
+          setStep(1);
         } else if (
           details.includes("email") ||
           details.includes("registration_members_email_unique")
         ) {
-          const alertMessage =
-            "One of these participant emails already exists in the database. Please use different participant details.";
-          window.alert(alertMessage);
-          toast.error(alertMessage);
+          toast.error("One of these participant emails is already registered.");
         } else {
           toast.error(error.message);
         }
@@ -373,9 +577,9 @@ export function RegistrationDialog() {
       }
 
       setSuccessMessage(
-        "Thanks. We received your details. Once we verify everything, we will add you to the WhatsApp group.",
+        "Thank you! We have received your details. Once we verify everything, we will add you to the official WhatsApp group.",
       );
-      toast.success("Registration submitted.");
+      toast.success("Registration submitted successfully!");
     } finally {
       setSubmitting(false);
     }
@@ -383,321 +587,479 @@ export function RegistrationDialog() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[92vh] max-w-5xl overflow-y-auto border-white/10 bg-card/95 p-0 shadow-[var(--shadow-elevate)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <DialogContent className="max-h-[92vh] max-w-xl overflow-y-auto border-white/5 bg-card/98 p-0 shadow-[var(--shadow-elevate)] backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {successMessage ? (
-          <div className="grid min-h-[420px] place-items-center p-6 text-center md:p-10">
-            <div className="mx-auto max-w-xl">
-              <div className="mx-auto grid size-20 place-items-center rounded-full border border-india-green/30 bg-india-green/10 text-india-green shadow-[0_0_60px_-20px_oklch(0.68_0.19_145/0.75)]">
-                <CheckCircle2 className="size-10" />
+          <div className="grid min-h-[360px] place-items-center p-6 text-center">
+            <div className="max-w-md">
+              <div className="mx-auto grid size-16 place-items-center rounded-full border border-india-green/20 bg-india-green/5 text-india-green">
+                <CheckCircle2 className="size-8" />
               </div>
-              <Badge variant="outline" className="mt-6 border-india-green/30 text-india-green">
-                Registration completed
-              </Badge>
-              <DialogTitle className="mt-4 font-display text-3xl font-bold md:text-5xl">
-                Registration completed
+              <DialogTitle className="mt-5 font-display text-2xl font-bold text-foreground">
+                Ready to Hack!
               </DialogTitle>
-              <DialogDescription className="mx-auto mt-4 max-w-lg text-sm leading-6 text-muted-foreground md:text-base">
+              <DialogDescription className="mt-3 text-xs leading-5 text-muted-foreground">
                 {successMessage}
               </DialogDescription>
-              <p className="mt-6 text-xs uppercase tracking-[0.22em] text-saffron">
-                Returning to site in 3 seconds
+              <p className="mt-6 text-[10px] uppercase tracking-[0.2em] text-saffron">
+                Returning in 4 seconds
               </p>
             </div>
           </div>
         ) : (
-          <form onSubmit={submitRegistration} className="p-5 md:p-8">
-            <DialogHeader className="mb-6 text-left">
-              <Badge variant="outline" className="mb-3 w-fit border-saffron/30 text-saffron">
-                Registration
-              </Badge>
-              <DialogTitle className="font-display text-2xl font-bold md:text-4xl">
-                Register for <span className="tricolor-text">VibeCoding Hackathon 6.0</span>
-              </DialogTitle>
-              <DialogDescription className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                Complete the registration in four clean steps. Team name and participant emails are
-                checked strictly so no duplicate team or participant can enter again.
-              </DialogDescription>
-            </DialogHeader>
+          <form
+            onSubmit={submitRegistration}
+            className="flex flex-col justify-between min-h-[460px]"
+          >
+            {/* Minimal Progress Bar */}
+            <ProgressBar step={step} />
 
-            <Stepper activeStep={step} />
-
-            <div className="mt-8">
-              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <div className="text-xs uppercase tracking-[0.24em] text-saffron">
-                    Step {step} of 4
-                  </div>
-                  <h3 className="mt-1 font-display text-2xl font-bold">{currentStepTitle}</h3>
-                </div>
-                <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs text-muted-foreground">
-                  {participantType ? participantType : "Type"} /{" "}
-                  {teamSize ? `${getTeamMemberCount(teamSize)} member team` : "Team size"}
-                </div>
+            <div className="px-5 pt-6 pb-2 md:px-8">
+              <div className="flex items-center justify-between text-[9px] font-extrabold uppercase tracking-widest text-muted-foreground/60">
+                <span>Step {step} of 3</span>
+                <span className="text-saffron">VibeCoding 6.0</span>
               </div>
+              <DialogTitle className="mt-1 font-display text-lg font-bold text-foreground">
+                {step === 1 && "Profile & Team Setup"}
+                {step === 2 && "Team Lead Details"}
+                {step === 3 && teamSize === "solo"
+                  ? "Confirm & Submit"
+                  : step === 3 && "Crew & Submission"}
+              </DialogTitle>
+              <DialogDescription className="hidden">
+                Register for VibeCoding Hackathon 6.0
+              </DialogDescription>
+            </div>
 
+            <div className="px-5 py-4 md:px-8 space-y-5">
+              {/* STEP 1: Profile & Team Name Setup */}
               {step === 1 && (
-                <div className="grid gap-4 md:grid-cols-2">
-                  <ChoiceCard
-                    active={participantType === "student"}
-                    icon={<GraduationCap className="size-5" />}
-                    title="Student"
-                    description="For school, college, university, or independent student builders."
-                    onClick={() => {
-                      setParticipantType("student");
-                    }}
-                  />
-                  <ChoiceCard
-                    active={participantType === "professional"}
-                    icon={<BriefcaseBusiness className="size-5" />}
-                    title="Professional"
-                    description="For working professionals, freelancers, founders, and industry builders."
-                    onClick={() => {
-                      setParticipantType("professional");
-                    }}
-                  />
-                </div>
-              )}
-
-              {step === 2 && (
                 <div className="space-y-5">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    {teamOptions.map((option) => (
-                      <button
-                        key={option.size}
-                        type="button"
-                        onClick={() => {
-                          setTeamSize(option.size);
-                        }}
-                        className={cn(
-                          "rounded-2xl border p-5 text-left transition",
-                          teamSize === option.size
-                            ? "border-saffron/60 bg-saffron/10 shadow-[var(--shadow-saffron)]"
-                            : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
-                        )}
-                      >
-                        <div className="font-display text-4xl font-bold text-saffron">
-                          {option.label}
-                        </div>
-                        <div className="mt-3 font-semibold">{option.title}</div>
-                        <div className="mt-1 text-sm text-muted-foreground">
-                          {option.description}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                  <div>
-                    <Label htmlFor="team-name">Team name</Label>
-                    <Input
-                      id="team-name"
-                      value={teamName}
-                      onChange={(event) => {
-                        setTeamName(event.target.value);
-                      }}
-                      placeholder="Enter a unique team name"
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {step === 3 && (
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Field label="Lead full name" icon={<UserRound className="size-4" />}>
-                    <Input
-                      value={lead.fullName}
-                      onChange={(event) => {
-                        updateLead("fullName", event.target.value);
-                      }}
-                      placeholder="Full name"
-                    />
-                  </Field>
-                  <Field label="Lead email" icon={<Mail className="size-4" />}>
-                    <Input
-                      type="email"
-                      value={lead.email}
-                      onChange={(event) => {
-                        updateLead("email", event.target.value);
-                      }}
-                      placeholder="name@example.com"
-                    />
-                  </Field>
-                  <Field label="Phone" icon={<Phone className="size-4" />}>
-                    <Input
-                      value={lead.phone}
-                      onChange={(event) => {
-                        updateLead("phone", event.target.value);
-                      }}
-                      placeholder="+91 ..."
-                    />
-                  </Field>
-                  <Field
-                    label={participantType === "student" ? "School / college name" : "Company name"}
-                    icon={<BriefcaseBusiness className="size-4" />}
-                  >
-                    <Input
-                      value={lead.affiliation}
-                      onChange={(event) => {
-                        updateLead("affiliation", event.target.value);
-                      }}
-                      placeholder={
-                        participantType === "student" ? "School or college name" : "Company name"
-                      }
-                    />
-                  </Field>
-                  <Field
-                    label={participantType === "student" ? "Relevant study" : "Role"}
-                    icon={<Sparkles className="size-4" />}
-                  >
-                    <Input
-                      value={lead.note}
-                      onChange={(event) => {
-                        updateLead("note", event.target.value);
-                      }}
-                      placeholder={participantType === "student" ? "Branch / major" : "Job title"}
-                    />
-                  </Field>
-                  <Field label="LinkedIn profile" icon={<Link2 className="size-4" />}>
-                    <Input
-                      type="url"
-                      value={lead.linkedinUrl}
-                      onChange={(event) => {
-                        updateLead("linkedinUrl", event.target.value);
-                      }}
-                      placeholder="https://linkedin.com/in/..."
-                    />
-                  </Field>
-                  <Field label="LinkedIn repost URL" icon={<Sparkles className="size-4" />}>
-                    <Input
-                      type="url"
-                      value={lead.repostUrl}
-                      onChange={(event) => {
-                        updateLead("repostUrl", event.target.value);
-                      }}
-                      placeholder="Paste repost link"
-                    />
-                  </Field>
-                </div>
-              )}
-
-              {step === 4 && (
-                <div className="space-y-5">
-                  {members.length === 0 ? (
-                    <div className="rounded-2xl border border-india-green/30 bg-india-green/10 p-5">
-                      <div className="flex items-center gap-2 font-semibold">
-                        <CheckCircle2 className="size-5 text-india-green" />
-                        Solo registration ready
-                      </div>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Your lead details are enough for a solo team. Submit to send this for manual
-                        verification.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {members.map((member, index) => (
-                        <div
-                          key={index}
-                          className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+                  {/* Participant Type */}
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                      Profile Type
+                    </Label>
+                    <div className="grid grid-cols-2 gap-2 rounded-xl bg-white/[0.01] border border-white/5 p-1">
+                      {(["student", "professional"] as const).map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => {
+                            setParticipantType(type);
+                            markTouched("participantType");
+                          }}
+                          className={cn(
+                            "py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all",
+                            participantType === type
+                              ? "bg-white/10 text-saffron border border-saffron/20 shadow-sm font-extrabold"
+                              : "text-muted-foreground/70 hover:text-foreground hover:bg-white/[0.02] border border-transparent",
+                          )}
                         >
-                          <div className="mb-4 flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 font-semibold">
-                              <Users className="size-4 text-india-green" />
-                              Team member {index + 1}
-                            </div>
-                            <Badge variant="outline" className="border-white/10">
-                              Required
-                            </Badge>
-                          </div>
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <Field label="Full name" icon={<UserRound className="size-4" />}>
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Team Size */}
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                      Team Size
+                    </Label>
+                    <div className="grid grid-cols-4 gap-1.5 rounded-xl bg-white/[0.01] border border-white/5 p-1">
+                      {teamOptions.map((option) => (
+                        <button
+                          key={option.size}
+                          type="button"
+                          onClick={() => {
+                            setTeamSize(option.size);
+                            markTouched("teamSize");
+                          }}
+                          className={cn(
+                            "py-2.5 text-xs font-bold rounded-lg transition-all flex flex-col items-center justify-center",
+                            teamSize === option.size
+                              ? "bg-white/10 text-saffron border border-saffron/20 shadow-sm font-extrabold"
+                              : "text-muted-foreground/70 hover:text-foreground hover:bg-white/[0.02] border border-transparent",
+                          )}
+                        >
+                          <span className="text-sm font-black">{option.label}</span>
+                          <span className="text-[9px] uppercase tracking-wider mt-0.5 opacity-80">
+                            {option.size}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Team Name */}
+                  <Field
+                    label="Team Code Name"
+                    status={teamNameStatus}
+                    touched={touchedFields["teamName"]}
+                    successText="Team name available"
+                    errorText={
+                      teamNameStatus === "invalid"
+                        ? "At least 3 characters."
+                        : "Name already registered."
+                    }
+                  >
+                    <div className="relative flex items-center w-full">
+                      <Users className="absolute left-3 size-4 text-muted-foreground/60" />
+                      <Input
+                        id="team-name"
+                        value={teamName}
+                        onChange={(e) => {
+                          setTeamName(e.target.value);
+                          setTeamNameStatus("idle");
+                        }}
+                        onBlur={() => {
+                          markTouched("teamName");
+                          checkTeamNameDb(teamName);
+                        }}
+                        placeholder="Enter a unique team code name"
+                        className="pl-9 pr-10 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60 focus:ring-1 focus:ring-saffron/30"
+                      />
+                    </div>
+                  </Field>
+                </div>
+              )}
+
+              {/* STEP 2: Lead Info */}
+              {step === 2 && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Team Lead Full Name" touched={touchedFields["leadName"]}>
+                    <div className="relative flex items-center w-full">
+                      <UserRound className="absolute left-3 size-4 text-muted-foreground/60" />
+                      <Input
+                        value={lead.fullName}
+                        onChange={(e) => updateLead("fullName", e.target.value)}
+                        onBlur={() => markTouched("leadName")}
+                        placeholder="Enter full name"
+                        className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
+                      />
+                    </div>
+                  </Field>
+
+                  <Field
+                    label="Team Lead Email"
+                    status={leadEmailStatus}
+                    touched={touchedFields["leadEmail"]}
+                    successText="Email available"
+                    errorText={
+                      leadEmailStatus === "invalid"
+                        ? "Enter a valid email."
+                        : "Email already registered."
+                    }
+                  >
+                    <div className="relative flex items-center w-full">
+                      <Mail className="absolute left-3 size-4 text-muted-foreground/60" />
+                      <Input
+                        type="email"
+                        value={lead.email}
+                        onChange={(e) => updateLead("email", e.target.value)}
+                        onBlur={() => {
+                          markTouched("leadEmail");
+                          checkLeadEmailDb(lead.email);
+                        }}
+                        placeholder="lead@example.com"
+                        className="pl-9 pr-10 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
+                      />
+                    </div>
+                  </Field>
+
+                  <Field label="Phone / WhatsApp" touched={touchedFields["leadPhone"]}>
+                    <div className="relative flex items-center w-full">
+                      <Phone className="absolute left-3 size-4 text-muted-foreground/60" />
+                      <Input
+                        value={lead.phone}
+                        onChange={(e) => updateLead("phone", e.target.value)}
+                        onBlur={() => markTouched("leadPhone")}
+                        placeholder="+91..."
+                        className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
+                      />
+                    </div>
+                  </Field>
+
+                  <Field
+                    label={participantType === "student" ? "School / College" : "Company"}
+                    touched={touchedFields["leadAffiliation"]}
+                  >
+                    <div className="relative flex items-center w-full">
+                      <BriefcaseBusiness className="absolute left-3 size-4 text-muted-foreground/60" />
+                      <Input
+                        value={lead.affiliation}
+                        onChange={(e) => updateLead("affiliation", e.target.value)}
+                        onBlur={() => markTouched("leadAffiliation")}
+                        placeholder={
+                          participantType === "student" ? "College name" : "Organization"
+                        }
+                        className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
+                      />
+                    </div>
+                  </Field>
+
+                  <Field label="LinkedIn Profile" touched={touchedFields["leadLinkedin"]}>
+                    <div className="relative flex items-center w-full">
+                      <Link2 className="absolute left-3 size-4 text-muted-foreground/60" />
+                      <Input
+                        type="url"
+                        value={lead.linkedinUrl}
+                        onChange={(e) => updateLead("linkedinUrl", e.target.value)}
+                        onBlur={() => markTouched("leadLinkedin")}
+                        placeholder="linkedin.com/in/username"
+                        className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
+                      />
+                    </div>
+                  </Field>
+
+                  <Field label="LinkedIn Repost URL" touched={touchedFields["leadRepost"]}>
+                    <div className="relative flex items-center w-full">
+                      <Sparkles className="absolute left-3 size-4 text-muted-foreground/60" />
+                      <Input
+                        type="url"
+                        value={lead.repostUrl}
+                        onChange={(e) => updateLead("repostUrl", e.target.value)}
+                        onBlur={() => markTouched("leadRepost")}
+                        placeholder="Repost validation link"
+                        className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
+                      />
+                    </div>
+                  </Field>
+
+                  <div className="sm:col-span-2">
+                    <Field
+                      label={participantType === "student" ? "Study Branch" : "Job Role"}
+                      touched={touchedFields["leadNote"]}
+                    >
+                      <div className="relative flex items-center w-full">
+                        <Sparkles className="absolute left-3 size-4 text-muted-foreground/60" />
+                        <Input
+                          value={lead.note}
+                          onChange={(e) => updateLead("note", e.target.value)}
+                          onBlur={() => markTouched("leadNote")}
+                          placeholder={
+                            participantType === "student" ? "CS / IT, etc." : "Engineer, etc."
+                          }
+                          className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
+                        />
+                      </div>
+                    </Field>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 3: Crew Details & Submit */}
+              {step === 3 && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  {members.length > 0 && (
+                    <div className="space-y-4 border-b border-white/5 pb-4">
+                      {/* Tabs Bar */}
+                      <div className="flex gap-1.5 border-b border-white/5 pb-3 overflow-x-auto">
+                        {members.map((_, index) => {
+                          const isDone = isMemberTabComplete(index);
+                          const isActive = activeMemberTab === index;
+                          const hasError =
+                            memberEmailStatuses[index] === "taken" ||
+                            memberEmailStatuses[index] === "invalid";
+                          const touched = touchedFields[`member_${index}_email`];
+                          return (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => setActiveMemberTab(index)}
+                              className={cn(
+                                "flex items-center gap-1.5 px-3 py-2 text-[10px] font-extrabold uppercase tracking-wider rounded-lg border transition-all",
+                                isActive
+                                  ? "border-saffron/40 bg-saffron/5 text-saffron"
+                                  : "border-white/5 bg-transparent text-muted-foreground/60 hover:bg-white/[0.01]",
+                              )}
+                            >
+                              Crew {index + 2}
+                              {isDone && <Check className="size-3 text-india-green" />}
+                              {touched && hasError && <X className="size-3 text-destructive" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Member Inputs */}
+                      {members[activeMemberTab] && (
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <Field
+                            label="Full Name"
+                            touched={touchedFields[`member_${activeMemberTab}_name`]}
+                          >
+                            <div className="relative flex items-center w-full">
+                              <UserRound className="absolute left-3 size-4 text-muted-foreground/60" />
                               <Input
-                                value={member.fullName}
-                                onChange={(event) =>
-                                  updateMember(index, "fullName", event.target.value)
+                                value={members[activeMemberTab].fullName}
+                                onChange={(e) =>
+                                  updateMember(activeMemberTab, "fullName", e.target.value)
                                 }
-                                placeholder="Full name"
+                                onBlur={() => markTouched(`member_${activeMemberTab}_name`)}
+                                placeholder="Name"
+                                className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
                               />
-                            </Field>
-                            <Field label="Email" icon={<Mail className="size-4" />}>
+                            </div>
+                          </Field>
+
+                          <Field
+                            label="Email Address"
+                            status={memberEmailStatuses[activeMemberTab]}
+                            touched={touchedFields[`member_${activeMemberTab}_email`]}
+                            errorText={
+                              memberEmailStatuses[activeMemberTab] === "invalid"
+                                ? "Enter a unique valid email."
+                                : "Already registered."
+                            }
+                          >
+                            <div className="relative flex items-center w-full">
+                              <Mail className="absolute left-3 size-4 text-muted-foreground/60" />
                               <Input
                                 type="email"
-                                value={member.email}
-                                onChange={(event) =>
-                                  updateMember(index, "email", event.target.value)
+                                value={members[activeMemberTab].email}
+                                onChange={(e) =>
+                                  updateMember(activeMemberTab, "email", e.target.value)
                                 }
-                                placeholder="name@example.com"
+                                onBlur={() => {
+                                  markTouched(`member_${activeMemberTab}_email`);
+                                  checkMemberEmailDb(
+                                    activeMemberTab,
+                                    members[activeMemberTab].email,
+                                  );
+                                }}
+                                placeholder="member@example.com"
+                                className="pl-9 pr-10 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
                               />
-                            </Field>
-                            <Field label="LinkedIn profile" icon={<Link2 className="size-4" />}>
+                            </div>
+                          </Field>
+
+                          <Field
+                            label="LinkedIn Link"
+                            touched={touchedFields[`member_${activeMemberTab}_linkedin`]}
+                          >
+                            <div className="relative flex items-center w-full">
+                              <Link2 className="absolute left-3 size-4 text-muted-foreground/60" />
                               <Input
                                 type="url"
-                                value={member.linkedinUrl}
-                                onChange={(event) =>
-                                  updateMember(index, "linkedinUrl", event.target.value)
+                                value={members[activeMemberTab].linkedinUrl}
+                                onChange={(e) =>
+                                  updateMember(activeMemberTab, "linkedinUrl", e.target.value)
                                 }
-                                placeholder="https://linkedin.com/in/..."
+                                onBlur={() => markTouched(`member_${activeMemberTab}_linkedin`)}
+                                placeholder="linkedin.com/in/..."
+                                className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
                               />
-                            </Field>
-                            <Field
-                              label="LinkedIn repost URL"
-                              icon={<Sparkles className="size-4" />}
-                            >
+                            </div>
+                          </Field>
+
+                          <Field
+                            label="LinkedIn Repost Link"
+                            touched={touchedFields[`member_${activeMemberTab}_repost`]}
+                          >
+                            <div className="relative flex items-center w-full">
+                              <Sparkles className="absolute left-3 size-4 text-muted-foreground/60" />
                               <Input
                                 type="url"
-                                value={member.repostUrl}
-                                onChange={(event) =>
-                                  updateMember(index, "repostUrl", event.target.value)
+                                value={members[activeMemberTab].repostUrl}
+                                onChange={(e) =>
+                                  updateMember(activeMemberTab, "repostUrl", e.target.value)
                                 }
-                                placeholder="Paste repost link"
+                                onBlur={() => markTouched(`member_${activeMemberTab}_repost`)}
+                                placeholder="Repost link"
+                                className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
                               />
-                            </Field>
-                          </div>
+                            </div>
+                          </Field>
                         </div>
-                      ))}
+                      )}
                     </div>
                   )}
 
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                    <div className="flex items-center gap-2 font-semibold">
-                      <MessageCircleMore className="size-5 text-india-green" />
-                      After submission
+                  {/* Summary Ribbon */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.01] p-3 text-xs">
+                    <div className="flex items-center gap-2">
+                      <Crown className="size-3.5 text-saffron" />
+                      <span className="text-muted-foreground/60">Team Lead: </span>
+                      <span className="font-semibold text-foreground truncate max-w-[120px]">
+                        {lead.fullName || "Team Lead"}
+                      </span>
                     </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Once we verify your details and repost links, we will add approved
-                      participants to the WhatsApp group.
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground/60">Team: </span>
+                      <span className="font-bold text-saffron truncate max-w-[100px]">
+                        {teamName}
+                      </span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] border-white/5 uppercase py-0.5 capitalize bg-white/[0.01]"
+                      >
+                        {participantType}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] border-white/5 uppercase py-0.5 capitalize bg-white/[0.01]"
+                      >
+                        {teamSize}
+                      </Badge>
+                    </div>
                   </div>
+
+                  {/* Agreement checkbox */}
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={confirmedReview}
+                      onChange={(e) => setConfirmedReview(e.target.checked)}
+                      className="mt-0.5 size-3.5 rounded border-white/20 bg-background text-saffron focus:ring-saffron"
+                    />
+                    <div className="text-[10px] leading-4 text-muted-foreground/80">
+                      I confirm all details are accurate, and each team member has reposted the
+                      event post.
+                    </div>
+                  </label>
                 </div>
               )}
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Stepper Footer Controls */}
+            <div className="flex items-center justify-between border-t border-white/5 px-5 py-4 md:px-8 bg-card/40">
               <Button
                 type="button"
                 variant="outline"
                 onClick={previousStep}
                 disabled={step === 1 || submitting || checkingAvailability}
-                className="gap-2"
+                className="h-9 gap-1 text-xs border-white/10 bg-white/[0.01] hover:bg-white/[0.04]"
               >
-                <ArrowLeft className="size-4" />
+                <ArrowLeft className="size-3.5" />
                 Back
               </Button>
+
               <Button
                 type="submit"
-                disabled={submitting || checkingAvailability || (step !== 4 && !canGoNext)}
-                className="gap-2"
+                disabled={submitting || checkingAvailability || !canGoNext}
+                className={cn(
+                  "h-9 gap-1 text-xs font-bold text-background transition-all px-4 cursor-pointer",
+                  step === 3
+                    ? "bg-india-green text-white hover:brightness-110 shadow-sm"
+                    : "bg-primary text-primary-foreground hover:brightness-110 shadow-sm",
+                )}
               >
                 {submitting || checkingAvailability ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : step === 4 ? (
-                  <BadgeCheck className="size-4" />
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : step === 3 ? (
+                  <BadgeCheck className="size-3.5" />
                 ) : (
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-3.5" />
                 )}
                 {checkingAvailability
-                  ? "Checking"
-                  : step === 4
-                    ? "Submit registration"
+                  ? "Verifying"
+                  : step === 3
+                    ? submitting
+                      ? "Submitting..."
+                      : "Submit Registration"
                     : "Continue"}
               </Button>
             </div>
@@ -708,87 +1070,70 @@ export function RegistrationDialog() {
   );
 }
 
-function Stepper({ activeStep }: { activeStep: RegistrationStep }) {
-  const steps = ["Type", "Team", "Lead", "Submit"];
+// Subcomponents
 
+function ProgressBar({ step }: { step: number }) {
+  const percent = step === 1 ? 33 : step === 2 ? 66 : 100;
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {steps.map((label, index) => {
-        const stepNumber = index + 1;
-        const active = activeStep === stepNumber;
-        const done = activeStep > stepNumber;
-        return (
-          <div
-            key={label}
-            className={cn(
-              "rounded-2xl border px-3 py-3 text-center transition",
-              active || done
-                ? "border-saffron/50 bg-saffron/10 text-foreground"
-                : "border-white/10 bg-white/[0.03] text-muted-foreground",
-            )}
-          >
-            <div className="mx-auto grid size-8 place-items-center rounded-full border border-white/10 bg-background/60 text-xs font-bold">
-              {done ? <CheckCircle2 className="size-4 text-india-green" /> : stepNumber}
-            </div>
-            <div className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em]">
-              {label}
-            </div>
-          </div>
-        );
-      })}
+    <div className="relative w-full h-[2.5px] bg-white/5 overflow-hidden">
+      <div
+        className="h-full bg-gradient-to-r from-saffron to-india-green transition-all duration-300 ease-out"
+        style={{ width: `${percent}%` }}
+      />
     </div>
-  );
-}
-
-function ChoiceCard({
-  active,
-  icon,
-  title,
-  description,
-  onClick,
-}: {
-  active: boolean;
-  icon: ReactNode;
-  title: string;
-  description: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "rounded-2xl border p-5 text-left transition",
-        active
-          ? "border-saffron/60 bg-saffron/10 shadow-[var(--shadow-saffron)]"
-          : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]",
-      )}
-    >
-      <div className="grid size-12 place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-saffron">
-        {icon}
-      </div>
-      <div className="mt-4 font-display text-xl font-semibold">{title}</div>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
-    </button>
   );
 }
 
 function Field({
   label,
-  icon,
   children,
+  status = "idle",
+  touched = false,
+  errorText,
+  successText,
 }: {
   label: string;
-  icon?: ReactNode;
   children: ReactNode;
+  status?: "idle" | "checking" | "available" | "taken" | "invalid";
+  touched?: boolean;
+  errorText?: string;
+  successText?: string;
 }) {
+  const showStatus = touched && status !== "idle";
+
   return (
-    <div className="space-y-2">
-      <Label className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-        {icon}
+    <div className="space-y-1">
+      <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
         {label}
       </Label>
-      {children}
+      <div className="relative flex items-center">
+        {children}
+        <div className="absolute right-3 flex items-center gap-1.5 pointer-events-none">
+          {status === "checking" && <Loader2 className="size-3.5 animate-spin text-saffron" />}
+          {showStatus && status === "available" && <Check className="size-3.5 text-india-green" />}
+          {showStatus && (status === "taken" || status === "invalid") && (
+            <X className="size-3.5 text-destructive" />
+          )}
+        </div>
+      </div>
+      {showStatus && status === "taken" && errorText && (
+        <p className="text-[9px] text-destructive flex items-center gap-1 font-semibold">
+          <ShieldAlert className="size-2.5" />
+          {errorText}
+        </p>
+      )}
+      {showStatus && status === "invalid" && errorText && (
+        <p className="text-[9px] text-destructive flex items-center gap-1 font-semibold">
+          <ShieldAlert className="size-2.5" />
+          {errorText}
+        </p>
+      )}
+      {showStatus && status === "available" && successText && (
+        <p className="text-[9px] text-india-green flex items-center gap-1 font-semibold">
+          <Check className="size-2.5" />
+          {successText}
+        </p>
+      )}
     </div>
   );
 }
