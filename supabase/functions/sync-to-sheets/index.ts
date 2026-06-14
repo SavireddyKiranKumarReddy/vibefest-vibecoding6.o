@@ -105,6 +105,7 @@ const HEADERS = [
   "Team Name",
   "Team Size",
   "Participant Type",
+  // Lead
   "Lead Name",
   "Lead Email",
   "Lead Phone",
@@ -112,18 +113,24 @@ const HEADERS = [
   "Lead Repost URL",
   "Lead Affiliation",
   "Lead Role / Branch",
+  // Member 2
   "Member 2 Name",
   "Member 2 Email",
   "Member 2 LinkedIn",
   "Member 2 Repost URL",
+  // Member 3
   "Member 3 Name",
   "Member 3 Email",
   "Member 3 LinkedIn",
   "Member 3 Repost URL",
+  // Member 4
   "Member 4 Name",
   "Member 4 Email",
   "Member 4 LinkedIn",
   "Member 4 Repost URL",
+  // Convenience: all emails in one cell
+  "All Team Emails",
+  // Meta
   "Admin Notes",
   "Reviewed By",
 ];
@@ -178,12 +185,12 @@ async function appendRow(token: string, row: unknown[]) {
 
 // deno-lint-ignore no-explicit-any
 function buildRow(reg: any): unknown[] {
-  const members: Array<{ fullName?: string; email?: string; linkedinUrl?: string; repostUrl?: string }> =
+  const members: Array<{ fullName?: string; email?: string; linkedinUrl?: string; repostUrl?: string; role?: string }> =
     Array.isArray(reg.members_snapshot) ? reg.members_snapshot : [];
 
   // members_snapshot includes the lead as member_order 1; skip lead, take up to 3 extras
   const extras = members
-    .filter((m: { role?: string }) => m.role !== "lead")
+    .filter((m) => m.role !== "lead")
     .slice(0, 3);
 
   const pad = (arr: unknown[], len: number, fill: string = "") => [
@@ -198,8 +205,14 @@ function buildRow(reg: any): unknown[] {
       m.linkedinUrl ?? "",
       m.repostUrl ?? "",
     ]),
-    12, // 3 members × 4 cols
+    12, // 3 members x 4 cols
   );
+
+  // Collect all team emails into one comma-separated cell
+  const allEmails = [
+    reg.lead_email ?? "",
+    ...extras.map((m) => m.email ?? "").filter(Boolean),
+  ].join(", ");
 
   return [
     reg.id ?? "",
@@ -216,6 +229,7 @@ function buildRow(reg: any): unknown[] {
     reg.lead_affiliation ?? "",
     reg.lead_note ?? "",
     ...memberCols,
+    allEmails,
     reg.admin_notes ?? "",
     reg.reviewed_by ?? "",
   ];
