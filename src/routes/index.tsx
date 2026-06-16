@@ -42,7 +42,7 @@ import marPoster from "@/assets/posters/march-2026.jpg";
 import aprPoster from "@/assets/posters/april-2026.jpeg";
 import mayPoster from "@/assets/posters/may-2026.jpeg";
 
-const LINKEDIN_POST_URL = "https://www.linkedin.com/company/nxtgensec/";
+const LINKEDIN_POST_URL = "https://www.linkedin.com/posts/vibeathon-vibecodinghackathon-nxtgensec-share-7472608870960517120-X1Rf/?utm_source=share&utm_medium=member_android&rcm=ACoAAEZRRl0BvbXddDNmrIZ4a_gNMAsJcDmLlPQ";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -322,6 +322,15 @@ function Hero() {
             Register for July 6.0 <UserPlus className="size-4" />
           </button>
           <a
+            href={LINKEDIN_POST_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-[#0A66C2]/30 bg-[#0A66C2]/10 px-7 py-3.5 text-sm font-semibold text-[#0A66C2] hover:bg-[#0A66C2]/20 transition"
+          >
+            <Linkedin className="size-4" />
+            Repost on LinkedIn
+          </a>
+          <a
             href="#about"
             className="inline-flex items-center gap-2 rounded-full border border-white/15 px-7 py-3.5 text-sm font-semibold hover:bg-white/5 transition"
           >
@@ -499,7 +508,14 @@ function Timeline() {
 }
 
 function Process() {
-  const steps = [
+  const steps: Array<{
+    icon: any;
+    title: string;
+    text: string;
+    accent: string;
+    pill?: string;
+    link?: string;
+  }> = [
     {
       icon: FileCode2,
       title: "Register",
@@ -512,6 +528,7 @@ function Process() {
       text: "Every registered participant MUST repost the official VibeCoding 6.0 announcement on LinkedIn (or another relevant public account).",
       accent: "saffron",
       pill: "Mandatory",
+      link: LINKEDIN_POST_URL,
     },
     {
       icon: CheckCircle2,
@@ -577,6 +594,17 @@ function Process() {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">{s.text}</p>
+                {s.link && (
+                  <a
+                    href={s.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg border border-[#0A66C2]/30 bg-[#0A66C2]/10 px-4 py-2 text-xs font-semibold text-[#0A66C2] hover:bg-[#0A66C2]/20 transition"
+                  >
+                    <Linkedin className="size-3.5" />
+                    View Post to Repost
+                  </a>
+                )}
               </div>
             );
           })}

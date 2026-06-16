@@ -495,35 +495,6 @@ export function RegistrationDialog() {
     }
   };
 
-  async function sendConfirmationEmail(payload: TeamRegistrationPayload) {
-    try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-      const functionUrl = `${supabaseUrl}/functions/v1/send-email`;
-
-      const session = await supabase!.auth.getSession();
-      const token = session.data.session?.access_token ?? supabaseAnonKey;
-
-      await fetch(functionUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          apikey: supabaseAnonKey,
-        },
-        body: JSON.stringify({
-          type: "registration_confirmation",
-          to: payload.lead_email,
-          teamName: payload.team_name,
-          leadName: payload.lead_name,
-        }),
-      });
-      // Note: Email sending is best-effort, don't block registration success on email failure
-    } catch (err) {
-      console.warn("[send-confirmation-email] error:", err);
-    }
-  }
-
   const submitRegistration = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -609,9 +580,6 @@ export function RegistrationDialog() {
         "Be ready to vibe with your vibecoding skills! Once we verify everything, we will add you to the official WhatsApp group.",
       );
       toast.success("Registration submitted successfully!");
-      
-      // Send confirmation email
-      sendConfirmationEmail(payload);
     } finally {
       setSubmitting(false);
     }
