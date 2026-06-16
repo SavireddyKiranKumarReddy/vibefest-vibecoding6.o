@@ -542,9 +542,10 @@ function AdminPage() {
       toast.success(`Marked as ${status}.`);
       await loadRegistrations();
 
-      // Sync approved registrations to Google Sheets
+      // Sync approved registrations to Google Sheets and send approval email
       if (status === "approved") {
         syncToSheets(id);
+        sendApprovalEmail(id);
       }
     }
     setActionId(null);
@@ -578,6 +579,49 @@ function AdminPage() {
       }
     } catch (err) {
       console.warn("[sync-to-sheets] error:", err);
+    }
+  }
+
+  async function sendApprovalEmail(registrationId: string) {
+    try {
+      // Find the registration data
+      const registration = registrations.find((reg) => reg.id === registrationId);
+      if (!registration) {
+        console.warn("[send-approval-email] registration not found");
+        return;
+      }
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+      const functionUrl = `${supabaseUrl}/functions/v1/send-registration-email`;
+
+      const session = await supabase!.auth.getSession();
+      const token = session.data.session?.access_token ?? supabaseAnonKey;
+
+      const res = await fetch(functionUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          apikey: supabaseAnonKey,
+        },
+        body: JSON.stringify({
+          type: "approval_notification",
+          to: registration.lead_email,
+          teamName: registration.team_name,
+          leadName: registration.lead_name,
+          whatsappGroupLink: "", // Add WhatsApp group link here when available
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.warn("[send-approval-email] failed:", err);
+      } else {
+        console.log("[send-approval-email] success");
+      }
+    } catch (err) {
+      console.warn("[send-approval-email] error:", err);
     }
   }
 
@@ -755,9 +799,10 @@ function AdminPage() {
       setEditing(null);
       await loadRegistrations();
 
-      // Sync to Google Sheets when status is approved
+      // Sync to Google Sheets when status is approved and send approval email
       if (editing.status === "approved") {
         syncToSheets(editing.id);
+        sendApprovalEmail(editing.id);
       }
     }
     setSaving(false);
