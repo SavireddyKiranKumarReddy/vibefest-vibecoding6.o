@@ -79,23 +79,51 @@ const isEmailSyntaxValid = (email: string) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
+// Helper to normalize and fix URLs
+const normalizeUrl = (url: string): string => {
+  if (!url) return url;
+  
+  let normalized = url.trim();
+  
+  // If it doesn't start with http:// or https://, add https://
+  if (!normalized.match(/^https?:\/\//i)) {
+    // Remove www. if it starts with it
+    if (normalized.toLowerCase().startsWith('www.')) {
+      normalized = normalized.substring(4);
+    }
+    normalized = 'https://' + normalized;
+  }
+  
+  return normalized;
+};
+
 const isUrlSyntaxValid = (url: string) => {
   if (!url) return false;
+  
+  // Normalize the URL first
+  const normalized = normalizeUrl(url);
+  
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(normalized);
     return parsed.hostname.includes("linkedin.com");
   } catch {
-    return false;
+    // If URL parsing fails, check if it at least contains linkedin.com
+    return normalized.toLowerCase().includes("linkedin.com");
   }
 };
 
 const isRepostUrlSyntaxValid = (url: string) => {
   if (!url) return false;
+  
+  // Normalize the URL first
+  const normalized = normalizeUrl(url);
+  
   try {
-    new URL(url);
+    new URL(normalized);
     return true;
   } catch {
-    return false;
+    // Be more lenient - if it has a dot, consider it valid
+    return url.includes('.');
   }
 };
 
@@ -522,8 +550,8 @@ export function RegistrationDialog() {
         member_order: 1,
         fullName: lead.fullName.trim(),
         email: normalizedLeadEmail,
-        linkedinUrl: lead.linkedinUrl.trim(),
-        repostUrl: lead.repostUrl.trim(),
+        linkedinUrl: normalizeUrl(lead.linkedinUrl.trim()),
+        repostUrl: normalizeUrl(lead.repostUrl.trim()),
         affiliation: lead.affiliation?.trim() ?? "",
         note: lead.note?.trim() ?? "",
       },
@@ -532,8 +560,8 @@ export function RegistrationDialog() {
         member_order: index + 2,
         fullName: member.fullName.trim(),
         email: member.email.trim().toLowerCase(),
-        linkedinUrl: member.linkedinUrl.trim(),
-        repostUrl: member.repostUrl.trim(),
+        linkedinUrl: normalizeUrl(member.linkedinUrl.trim()),
+        repostUrl: normalizeUrl(member.repostUrl.trim()),
         affiliation: member.affiliation?.trim() ?? "",
         note: member.note?.trim() ?? "",
       })),
@@ -546,8 +574,8 @@ export function RegistrationDialog() {
       lead_name: lead.fullName.trim(),
       lead_email: normalizedLeadEmail,
       lead_phone: lead.phone.trim(),
-      lead_linkedin: lead.linkedinUrl.trim(),
-      lead_repost_url: lead.repostUrl.trim(),
+      lead_linkedin: normalizeUrl(lead.linkedinUrl.trim()),
+      lead_repost_url: normalizeUrl(lead.repostUrl.trim()),
       lead_affiliation: lead.affiliation?.trim() ?? "",
       lead_note: lead.note?.trim() ?? "",
       members: payloadMembers,
