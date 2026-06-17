@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/accordion";
 import { AshokaChakra } from "@/components/AshokaChakra";
 import { RegistrationDialog, openRegistrationDialog } from "@/components/RegistrationSection";
+import { VisitorCounter } from "@/components/VisitorCounter";
 import {
   Calendar,
   Users,
@@ -93,6 +94,7 @@ function Index() {
       <Nav />
       <MobileBottomNav />
       <RegistrationDialog />
+      <VisitorCounter />
       <Hero />
       <TricolorDivider />
       <About />
