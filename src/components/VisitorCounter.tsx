@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Eye, TrendingUp } from "lucide-react";
+import { Eye } from "lucide-react";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +51,7 @@ export function VisitorCounter() {
       .subscribe();
 
     // Show the counter after a short delay
-    const timer = setTimeout(() => setIsVisible(true), 1000);
+    const timer = setTimeout(() => setIsVisible(true), 500);
 
     return () => {
       clearTimeout(timer);
@@ -67,7 +67,7 @@ export function VisitorCounter() {
         p_visitor_id: visitorId,
         p_page_path: window.location.pathname,
         p_user_agent: navigator.userAgent,
-        p_ip_address: null, // IP will be captured server-side if needed
+        p_ip_address: null,
       });
 
       if (error) {
@@ -103,7 +103,7 @@ export function VisitorCounter() {
 
   function triggerAnimation() {
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 600);
+    setTimeout(() => setIsAnimating(false), 400);
   }
 
   if (!isSupabaseConfigured || !stats) {
@@ -119,69 +119,27 @@ export function VisitorCounter() {
     >
       <div
         className={cn(
-          "group relative rounded-2xl border border-white/10 bg-gradient-to-br from-card/95 to-card/80 backdrop-blur-xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.5)] hover:scale-105",
-          isAnimating && "scale-110 border-saffron/40 shadow-[0_0_24px_-4px_rgba(255,153,0,0.4)]"
+          "group relative flex items-center gap-3 rounded-full border border-white/10 bg-gradient-to-r from-black/90 to-black/80 backdrop-blur-xl px-5 py-3 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)] transition-all duration-300 hover:scale-105 hover:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.8)]",
+          isAnimating && "scale-110 border-india-green/50 shadow-[0_0_28px_-4px_rgba(34,197,94,0.4)]"
         )}
       >
-        {/* Gradient border effect */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-saffron/20 via-transparent to-india-green/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        {/* Eye Icon */}
+        <Eye 
+          className={cn(
+            "size-5 text-india-green transition-all duration-300",
+            isAnimating && "scale-125 text-india-green drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+          )} 
+        />
         
-        <div className="relative p-4 min-w-[240px]">
-          {/* Header */}
-          <div className="flex items-center gap-2 mb-3">
-            <div className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-saffron/20 to-india-green/20">
-              <TrendingUp className="size-4 text-saffron" />
-            </div>
-            <div className="flex-1">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Live Stats
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-saffron opacity-75"></span>
-                <span className="relative inline-flex size-2 rounded-full bg-saffron"></span>
-              </span>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="space-y-2">
-            {/* Total Visits */}
-            <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2 transition-all hover:bg-white/[0.04]">
-              <div className="flex items-center gap-2">
-                <Eye className="size-3.5 text-saffron/80" />
-                <span className="text-xs font-medium text-muted-foreground">Total Visits</span>
-              </div>
-              <span
-                className={cn(
-                  "font-display text-lg font-bold tabular-nums transition-all duration-300",
-                  isAnimating && "text-saffron scale-110"
-                )}
-              >
-                {stats.total_visits.toLocaleString()}
-              </span>
-            </div>
-
-            {/* Unique Visitors */}
-            <div className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2 transition-all hover:bg-white/[0.04]">
-              <div className="flex items-center gap-2">
-                <Users className="size-3.5 text-india-green/80" />
-                <span className="text-xs font-medium text-muted-foreground">Unique</span>
-              </div>
-              <span className="font-display text-lg font-bold tabular-nums">
-                {stats.unique_visitors.toLocaleString()}
-              </span>
-            </div>
-          </div>
-
-          {/* Footer - Powered by badge */}
-          <div className="mt-3 pt-2 border-t border-white/5">
-            <div className="flex items-center justify-center gap-1.5 text-[9px] uppercase tracking-wider text-muted-foreground/60">
-              <span className="tricolor-text font-semibold">VibeCoding 6.0</span>
-            </div>
-          </div>
-        </div>
+        {/* Count */}
+        <span
+          className={cn(
+            "font-display text-2xl font-bold tabular-nums text-white transition-all duration-300",
+            isAnimating && "text-india-green scale-110"
+          )}
+        >
+          {stats.total_visits}
+        </span>
       </div>
     </div>
   );
