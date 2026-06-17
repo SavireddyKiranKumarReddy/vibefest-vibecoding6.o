@@ -5,6 +5,7 @@ import {
   BadgeCheck,
   BriefcaseBusiness,
   CheckCircle2,
+  ExternalLink,
   GraduationCap,
   Link2,
   Loader2,
@@ -74,6 +75,9 @@ const emptyLead = () => ({
   ...emptyParticipant(),
   phone: "",
 });
+
+const LINKEDIN_POST_URL =
+  "https://www.linkedin.com/posts/vibeathon-vibecodinghackathon-nxtgensec-share-7472608870960517120-X1Rf/?utm_source=share&utm_medium=member_android&rcm=ACoAAEZRRl0BvbXddDNmrIZ4a_gNMAsJcDmLlPQ";
 
 const isEmailSyntaxValid = (email: string) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -841,16 +845,31 @@ export function RegistrationDialog() {
                   </Field>
 
                   <Field label="LinkedIn Repost URL" touched={touchedFields["leadRepost"]}>
-                    <div className="relative flex items-center w-full">
-                      <Sparkles className="absolute left-3 size-4 text-muted-foreground/60" />
-                      <Input
-                        type="url"
-                        value={lead.repostUrl}
-                        onChange={(e) => updateLead("repostUrl", e.target.value)}
-                        onBlur={() => markTouched("leadRepost")}
-                        placeholder="Repost validation link"
-                        className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
-                      />
+                    <div className="space-y-2">
+                      {/* Click to open the post */}
+                      <a
+                        href={LINKEDIN_POST_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 w-full rounded-lg border border-[#0A66C2]/30 bg-[#0A66C2]/5 px-3 py-2 text-[11px] font-semibold text-[#0A66C2] hover:bg-[#0A66C2]/10 hover:border-[#0A66C2]/50 transition-all"
+                      >
+                        <svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        Open LinkedIn Post to Repost
+                        <ExternalLink className="size-3 ml-auto opacity-60" />
+                      </a>
+                      <div className="relative flex items-center w-full">
+                        <Sparkles className="absolute left-3 size-4 text-muted-foreground/60" />
+                        <Input
+                          type="url"
+                          value={lead.repostUrl}
+                          onChange={(e) => updateLead("repostUrl", e.target.value)}
+                          onBlur={() => markTouched("leadRepost")}
+                          placeholder="Paste your repost link here"
+                          className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
+                        />
+                      </div>
                     </div>
                   </Field>
 
@@ -985,18 +1004,33 @@ export function RegistrationDialog() {
                             label="LinkedIn Repost Link"
                             touched={touchedFields[`member_${activeMemberTab}_repost`]}
                           >
-                            <div className="relative flex items-center w-full">
-                              <Sparkles className="absolute left-3 size-4 text-muted-foreground/60" />
-                              <Input
-                                type="url"
-                                value={members[activeMemberTab].repostUrl}
-                                onChange={(e) =>
-                                  updateMember(activeMemberTab, "repostUrl", e.target.value)
-                                }
-                                onBlur={() => markTouched(`member_${activeMemberTab}_repost`)}
-                                placeholder="Repost link"
-                                className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
-                              />
+                            <div className="space-y-2">
+                              {/* Click to open the post */}
+                              <a
+                                href={LINKEDIN_POST_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 w-full rounded-lg border border-[#0A66C2]/30 bg-[#0A66C2]/5 px-3 py-2 text-[11px] font-semibold text-[#0A66C2] hover:bg-[#0A66C2]/10 hover:border-[#0A66C2]/50 transition-all"
+                              >
+                                <svg className="size-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                </svg>
+                                Open LinkedIn Post to Repost
+                                <ExternalLink className="size-3 ml-auto opacity-60" />
+                              </a>
+                              <div className="relative flex items-center w-full">
+                                <Sparkles className="absolute left-3 size-4 text-muted-foreground/60" />
+                                <Input
+                                  type="url"
+                                  value={members[activeMemberTab].repostUrl}
+                                  onChange={(e) =>
+                                    updateMember(activeMemberTab, "repostUrl", e.target.value)
+                                  }
+                                  onBlur={() => markTouched(`member_${activeMemberTab}_repost`)}
+                                  placeholder="Paste your repost link here"
+                                  className="pl-9 h-10 border-white/10 bg-white/[0.01] hover:border-white/20 focus:border-saffron/60"
+                                />
+                              </div>
                             </div>
                           </Field>
                         </div>
