@@ -138,7 +138,7 @@ export function VisitorCounter() {
             isAnimating && "text-india-green scale-110"
           )}
         >
-          {stats.total_visits}
+          {stats.unique_visitors}
         </span>
       </div>
     </div>
