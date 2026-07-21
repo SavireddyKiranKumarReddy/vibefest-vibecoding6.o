@@ -115,8 +115,8 @@ function registerLink(className = "") {
   return (
     <button
       type="button"
-      disabled
-      className={`inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-semibold text-muted-foreground shadow-[var(--shadow-saffron)] transition cursor-not-allowed ${className}`}
+      onClick={() => window.dispatchEvent(new CustomEvent("open-registration-closed-dialog"))}
+      className={`inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-semibold text-muted-foreground shadow-[var(--shadow-saffron)] transition ${className}`}
     >
       Registrations Closed <Lock className="size-4" />
     </button>
@@ -203,8 +203,8 @@ function MobileBottomNav() {
               <button
                 key={item.label}
                 type="button"
-                disabled
-                className={`${commonClasses} cursor-not-allowed opacity-80`}
+                onClick={() => window.dispatchEvent(new CustomEvent("open-registration-closed-dialog"))}
+                className={`${commonClasses} opacity-80`}
                 aria-label="Registrations closed"
               >
                 <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-b from-white/10 via-white/5 to-white/10 text-muted-foreground shadow-[0_16px_34px_-18px_color-mix(in_oklab,var(--saffron)_80%,transparent)] ring-1 ring-white/20">
@@ -318,8 +318,8 @@ function Hero() {
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <button
             type="button"
-            disabled
-            className="inline-flex cursor-not-allowed items-center gap-2 rounded-full border border-white/15 bg-white/10 px-7 py-3.5 text-sm font-semibold text-muted-foreground"
+            onClick={() => window.dispatchEvent(new CustomEvent("open-registration-closed-dialog"))}
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-7 py-3.5 text-sm font-semibold text-muted-foreground"
           >
             Registrations Closed <Lock className="size-4" />
           </button>
