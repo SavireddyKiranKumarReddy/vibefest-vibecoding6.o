@@ -7,7 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { AshokaChakra } from "@/components/AshokaChakra";
-import { RegistrationDialog, openRegistrationDialog } from "@/components/RegistrationSection";
+import { RegistrationDialog } from "@/components/RegistrationSection";
 import { VisitorCounter } from "@/components/VisitorCounter";
 import {
   Calendar,
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "VibeCoding Hackathon 6.0 by NxtGenSec (Next Generation Security) is the July 2026 online hackathon. Registration starts June 1. Build on July 25, 26, and 27. Final submission is due July 27 at 11:49 PM IST.",
+          "VibeCoding Hackathon 6.0 by NxtGenSec (Next Generation Security) is the July 2026 online hackathon. Registrations for this edition are now closed. Build on July 25, 26, and 27. Final submission is due July 27 at 11:49 PM IST.",
       },
       {
         property: "og:title",
@@ -83,7 +83,7 @@ const NAV = [
 const MOBILE_NAV = [
   { label: "Home", href: "#top", icon: Home },
   { label: "Timeline", href: "#timeline", icon: CalendarRange },
-  { label: "Register", icon: UserPlus, primary: true },
+  { label: "Closed", icon: Lock, primary: true },
   { label: "Benefits", href: "#benefits", icon: Gem },
   { label: "FAQs", href: "#faq", icon: HelpCircle },
 ];
@@ -115,10 +115,10 @@ function registerLink(className = "") {
   return (
     <button
       type="button"
-      onClick={openRegistrationDialog}
-      className={`inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-saffron)] transition hover:brightness-110 ${className}`}
+      disabled
+      className={`inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-semibold text-muted-foreground shadow-[var(--shadow-saffron)] transition cursor-not-allowed ${className}`}
     >
-      Register <UserPlus className="size-4" />
+      Registrations Closed <Lock className="size-4" />
     </button>
   );
 }
@@ -203,15 +203,15 @@ function MobileBottomNav() {
               <button
                 key={item.label}
                 type="button"
-                onClick={openRegistrationDialog}
-                className={commonClasses}
-                aria-label="Register for VibeCoding 6.0"
+                disabled
+                className={`${commonClasses} cursor-not-allowed opacity-80`}
+                aria-label="Registrations closed"
               >
-                <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-b from-primary via-[#f59e0b] to-[#d97706] text-ink shadow-[0_16px_34px_-18px_color-mix(in_oklab,var(--saffron)_80%,transparent)] ring-1 ring-white/30">
+                <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-b from-white/10 via-white/5 to-white/10 text-muted-foreground shadow-[0_16px_34px_-18px_color-mix(in_oklab,var(--saffron)_80%,transparent)] ring-1 ring-white/20">
                   <Icon className="size-5" strokeWidth={2.4} />
                 </span>
-                <span className="text-[9px] font-semibold uppercase leading-none text-primary">
-                  Register
+                <span className="text-[9px] font-semibold uppercase leading-none text-muted-foreground">
+                  Closed
                 </span>
               </button>
             );
@@ -318,10 +318,10 @@ function Hero() {
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <button
             type="button"
-            onClick={openRegistrationDialog}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground hover:brightness-110 transition shadow-[var(--shadow-saffron)]"
+            disabled
+            className="inline-flex cursor-not-allowed items-center gap-2 rounded-full border border-white/15 bg-white/10 px-7 py-3.5 text-sm font-semibold text-muted-foreground"
           >
-            Register for July 6.0 <UserPlus className="size-4" />
+            Registrations Closed <Lock className="size-4" />
           </button>
           <a
             href={LINKEDIN_POST_URL}
@@ -338,6 +338,10 @@ function Hero() {
           >
             Explore Hackathon
           </a>
+        </div>
+
+        <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-saffron/20 bg-saffron/10 px-4 py-2 text-sm text-saffron">
+          <Lock className="size-4" /> Registrations for this edition are now closed.
         </div>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
@@ -521,7 +525,7 @@ function Process() {
     {
       icon: FileCode2,
       title: "Register",
-      text: "Submit solo or team details through the registration form. A team counts as one registration slot.",
+      text: "Registrations for this edition are now closed, so new submissions are no longer being accepted.",
       accent: "saffron",
     },
     {
@@ -567,7 +571,7 @@ function Process() {
         <SectionHeading
           eyebrow="How It Works"
           title="Registration Process"
-          sub="Registration is free, but approval is manual after participant checks. Only approved teams move into the hackathon."
+          sub="Registration for this edition is now closed. We are no longer accepting new submissions."
         />
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {steps.map((s, i) => {
@@ -1074,11 +1078,11 @@ function Faq() {
   const faqs = [
     [
       "Is there a registration fee to participate?",
-      "No. The July edition is completely free for all accepted participants. There is no registration fee.",
+      "Registration for this edition is now closed. The July edition is no longer accepting new submissions.",
     ],
     [
       "Can I participate as an individual?",
-      "Yes. You can register solo or join with a team of up to 4 — a team counts as one registration slot.",
+      "The registration window for this edition has closed, but future editions may support solo or team participation again.",
     ],
     [
       "What is the team size limit?",
@@ -1153,16 +1157,16 @@ function FinalCta() {
           Ready to build with the <span className="tricolor-text">VibeCoding</span> community?
         </h2>
         <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-          Registration is free. Repost the official announcement on LinkedIn, get verified, and join
-          the dedicated WhatsApp group for the final evaluation.
+          Registrations for this edition are now closed. Thank you to everyone who showed interest;
+          we will share future opportunities through official updates.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <button
             type="button"
-            onClick={openRegistrationDialog}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground hover:brightness-110 transition shadow-[var(--shadow-saffron)]"
+            disabled
+            className="inline-flex cursor-not-allowed items-center gap-2 rounded-full border border-white/15 bg-white/10 px-8 py-4 text-sm font-semibold text-muted-foreground"
           >
-            Register Now <UserPlus className="size-4" />
+            Registrations Closed <Lock className="size-4" />
           </button>
           <a
             href={LINKEDIN_POST_URL}
@@ -1175,14 +1179,13 @@ function FinalCta() {
         </div>
         <div className="mt-8 flex flex-wrap justify-center gap-6 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <CheckCircle2 className="size-3.5 text-india-green" /> Free registration
+            <CheckCircle2 className="size-3.5 text-india-green" /> Applications are closed
           </span>
           <span className="flex items-center gap-1.5">
-            <Linkedin className="size-3.5 text-saffron" /> LinkedIn repost required
+            <Linkedin className="size-3.5 text-saffron" /> Future updates on LinkedIn
           </span>
           <span className="flex items-center gap-1.5">
-            <MessageCircle className="size-3.5 text-india-green" /> WhatsApp group after
-            verification
+            <MessageCircle className="size-3.5 text-india-green" /> Next edition details soon
           </span>
         </div>
       </div>
